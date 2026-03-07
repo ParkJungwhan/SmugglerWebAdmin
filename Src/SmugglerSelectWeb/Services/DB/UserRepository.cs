@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using Dapper;
-using SmugglerWebCommon.DB;
 
 namespace SmugglerSelectWeb.Services.DB;
 
@@ -15,8 +14,6 @@ public class UserRepository
 
     public async Task<IEnumerable<User>> GetUsers()
     {
-        //using var conn = _factory.CreateConnection();
-
         string sql = "SELECT id, name, email FROM users";
 
         return await _db.QueryAsync<User>(sql);
@@ -24,8 +21,6 @@ public class UserRepository
 
     public async Task<User?> GetUser(int id)
     {
-        //using var conn = _factory.CreateConnection();
-
         string sql = "SELECT id, name, email FROM users WHERE id=@Id";
 
         return await _db.QueryFirstOrDefaultAsync<User>(sql, new { Id = id });
@@ -33,8 +28,6 @@ public class UserRepository
 
     public async Task<int> InsertUser(User user)
     {
-        //using var conn = _factory.CreateConnection();
-
         string sql = @"
         INSERT INTO users(name,email)
         VALUES(@Name,@Email)

@@ -7,7 +7,6 @@ using SmugglerSelectWeb.Components;
 using SmugglerSelectWeb.Components.Account;
 using SmugglerSelectWeb.Data;
 using SmugglerSelectWeb.Services.DB;
-using SmugglerWebCommon.DB;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +17,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-builder.Services.AddScoped<PostgresqlDBConnectionFactory>();
+//builder.Services.AddScoped<PostgresqlDBConnectionFactory>();
 builder.Services.AddScoped<UserRepository>();
 
 builder.Services.AddAuthentication(options =>
@@ -31,20 +30,6 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("Postgres") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 // dapper - postgresql db 사용시
 builder.Services.AddScoped<IDbConnection>(sp => new NpgsqlConnection(connectionString));
-
-// ef - sql server 사용시
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(connectionString));
-//builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-//builder.Services.AddIdentityCore<ApplicationUser>(options =>
-//    {
-//        options.SignIn.RequireConfirmedAccount = true;
-//        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
-//    })
-//    //.AddEntityFrameworkStores<ApplicationDbContext>()
-//    .AddSignInManager()
-//    .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
