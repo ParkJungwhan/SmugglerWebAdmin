@@ -1,4 +1,6 @@
 <Solution>
-  <Project Path="Src/SmugglerWebAdmin.Client/SmugglerWebAdmin.Client.csproj" />
-  <Project Path="Src/SmugglerWebAdmin/SmugglerWebAdmin.csproj" />
+  <Project Path="Src/SmugglerSelectWeb/SmugglerSelectWeb.csproj" Id="59aaa40d-d585-4b8c-a69e-434dbaf9fd70" />
+  <Project Path="Src/SmugglerWebCommon/SmugglerWebCommon.csproj" Id="df2382f9-192b-46d3-8987-535f56ac7051" />
+  <Project Path="Src/SmugglerWebTool.Client/SmugglerWebTool.Client.csproj" />
+  <Project Path="Src/SmugglerWebTool/SmugglerWebTool.csproj" />
 </Solution>
