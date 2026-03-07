@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Src/SmugglerWebAdmin.Client/SmugglerWebAdmin.Client.csproj" />
+  <Project Path="Src/SmugglerWebAdmin/SmugglerWebAdmin.csproj" />
+</Solution>
