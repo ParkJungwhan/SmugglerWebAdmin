@@ -18,7 +18,7 @@ builder.Services.AddDataProtection();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<IRegionAccessService, InMemoryRegionAccessService>();
+builder.Services.AddScoped<IRegionAccessService, DapperRegionAccessService>();
 builder.Services.AddScoped<IRegionHandoffTokenService, RegionHandoffTokenService>();
 
 builder.Services.AddAuthentication(options =>
@@ -59,3 +59,4 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+

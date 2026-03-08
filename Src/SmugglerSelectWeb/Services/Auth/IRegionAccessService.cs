@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Dapper;
 using SmugglerWebCommon.Auth.Models;
+using SmugglerWebCommon.Data;
 
 namespace SmugglerSelectWeb.Services.Auth;
 
@@ -8,19 +10,31 @@ public interface IRegionAccessService
     Task<IReadOnlyList<RegionOption>> GetAvailableRegionsAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default);
 }
 
-public sealed class InMemoryRegionAccessService : IRegionAccessService
+public sealed class DapperRegionAccessService(IDbConnectionFactory connectionFactory) : IRegionAccessService
 {
-    public Task<IReadOnlyList<RegionOption>> GetAvailableRegionsAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<RegionOption>> GetAvailableRegionsAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {
-        var isAdmin = user.IsInRole("Admin") || user.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Array.Empty<RegionOption>();
+        }
 
-        IReadOnlyList<RegionOption> regions =
-        [
-            new RegionOption { RegionCode = "KR-SEOUL", RegionName = "Seoul", CanAccess = true },
-            new RegionOption { RegionCode = "JP-TOKYO", RegionName = "Tokyo", CanAccess = isAdmin },
-            new RegionOption { RegionCode = "US-EAST", RegionName = "US East", CanAccess = isAdmin }
-        ];
+        const string sql = """
+            SELECT
+                r.region_code AS RegionCode,
+                r.region_name AS RegionName,
+                TRUE AS CanAccess
+            FROM user_regions ur
+            INNER JOIN regions r ON r.region_code = ur.region_code
+            WHERE ur.user_id = @UserId
+            ORDER BY r.region_name;
+            """;
 
-        return Task.FromResult(regions);
+        using var connection = connectionFactory.CreateConnection();
+        var command = new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken);
+        var regions = await connection.QueryAsync<RegionOption>(command);
+
+        return regions.ToList();
     }
 }
