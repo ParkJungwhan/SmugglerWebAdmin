@@ -24,6 +24,7 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 builder.Services.AddSmugglerDataAccess(builder.Configuration);
+builder.Services.AddSmugglerRsa(builder.Configuration);
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();

@@ -11,11 +11,21 @@ public interface IRsaCryptoService
 
 public sealed class RsaCryptoService : IRsaCryptoService
 {
-    private readonly RsaKeyOptions _options;
+    private readonly string _publicKeyPem;
+    private readonly string _privateKeyPem;
 
     public RsaCryptoService(RsaKeyOptions options)
     {
-        _options = options;
+        if (!string.IsNullOrWhiteSpace(options.PublicKeyPem) && !string.IsNullOrWhiteSpace(options.PrivateKeyPem))
+        {
+            _publicKeyPem = options.PublicKeyPem;
+            _privateKeyPem = options.PrivateKeyPem;
+            return;
+        }
+
+        using var rsa = RSA.Create(2048);
+        _publicKeyPem = rsa.ExportRSAPublicKeyPem();
+        _privateKeyPem = rsa.ExportRSAPrivateKeyPem();
     }
 
     public string EncryptWithPublicKey(string plainText)
@@ -23,7 +33,7 @@ public sealed class RsaCryptoService : IRsaCryptoService
         ArgumentException.ThrowIfNullOrWhiteSpace(plainText);
 
         using var rsa = RSA.Create();
-        rsa.ImportFromPem(_options.PublicKeyPem.AsSpan());
+        rsa.ImportFromPem(_publicKeyPem.AsSpan());
 
         var plainBytes = Encoding.UTF8.GetBytes(plainText);
         var encrypted = rsa.Encrypt(plainBytes, RSAEncryptionPadding.OaepSHA256);
@@ -35,7 +45,7 @@ public sealed class RsaCryptoService : IRsaCryptoService
         ArgumentException.ThrowIfNullOrWhiteSpace(cipherTextBase64);
 
         using var rsa = RSA.Create();
-        rsa.ImportFromPem(_options.PrivateKeyPem.AsSpan());
+        rsa.ImportFromPem(_privateKeyPem.AsSpan());
 
         var encryptedBytes = Convert.FromBase64String(cipherTextBase64);
         var decrypted = rsa.Decrypt(encryptedBytes, RSAEncryptionPadding.OaepSHA256);

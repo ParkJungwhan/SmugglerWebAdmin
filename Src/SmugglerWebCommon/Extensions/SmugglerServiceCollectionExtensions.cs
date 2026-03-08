@@ -27,11 +27,6 @@ public static class SmugglerServiceCollectionExtensions
             PrivateKeyPem = configuration["Security:RSA:PrivateKeyPem"] ?? string.Empty
         };
 
-        if (string.IsNullOrWhiteSpace(options.PublicKeyPem) || string.IsNullOrWhiteSpace(options.PrivateKeyPem))
-        {
-            throw new InvalidOperationException("Security:RSA:PublicKeyPem and Security:RSA:PrivateKeyPem are required.");
-        }
-
         services.AddSingleton(options);
         services.AddSingleton<IRsaCryptoService, RsaCryptoService>();
 

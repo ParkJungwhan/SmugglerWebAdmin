@@ -1,4 +1,4 @@
-﻿@page "/Account/Register"
+@page "/Account/Register"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using SmugglerSelectWeb.Data
+@using SmugglerWebCommon.Security
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -14,6 +15,7 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IRsaCryptoService RsaCryptoService
 
 <PageTitle>Register</PageTitle>
 
@@ -72,12 +74,26 @@
 
     public async Task RegisterUser(EditContext editContext)
     {
+        var existingUser = await UserManager.FindByEmailAsync(Input.Email);
+        if (existingUser is not null)
+        {
+            identityErrors =
+            [
+                new IdentityError { Description = "This email is already registered." }
+            ];
+            return;
+        }
+
         var user = CreateUser();
 
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
+
+        var encryptedPassword = RsaCryptoService.EncryptWithPublicKey(Input.Password);
+        var decryptedPassword = RsaCryptoService.DecryptWithPrivateKey(encryptedPassword);
+
+        var result = await UserManager.CreateAsync(user, decryptedPassword);
 
         if (!result.Succeeded)
         {
@@ -85,7 +101,7 @@
             return;
         }
 
-        Logger.LogInformation("User created a new account with password.");
+        Logger.LogInformation("User created a new account with password (RSA flow applied).");
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -128,6 +144,7 @@
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
+
         return (IUserEmailStore<ApplicationUser>)UserStore;
     }
 
