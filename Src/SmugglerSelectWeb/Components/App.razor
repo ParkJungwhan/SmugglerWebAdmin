@@ -33,10 +33,21 @@
 @code {
     private readonly MudTheme _selectTheme = new()
     {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#1f9ea0",
+            Secondary = "#4f997d",
+            Tertiary = "#e15d3d",
+            Background = "#a44b3f",
+            Surface = "#1f9ea0",
+            AppbarBackground = "#183437",
+            AppbarText = "#f6f7f4",
+            TextPrimary = "#f6f7f4",
+            TextSecondary = "#dff2ed"
+        },
         LayoutProperties = new LayoutProperties
         {
             DefaultBorderRadius = "0px"
         }
     };
 }
-

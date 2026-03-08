@@ -1,6 +1,6 @@
 html, body {
     margin: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
     min-height: 100%;
 }
 
@@ -11,4 +11,37 @@ body {
 .validation-message,
 .text-danger {
     color: #ffd9cf !important;
+}
+
+.select-login-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.select-login-frame {
+    width: 100%;
+    border: 1px solid #0d565a;
+}
+
+.select-login-left {
+    min-height: 420px;
+    background: linear-gradient(145deg, var(--mud-palette-secondary), #3f8f74);
+}
+
+.select-login-logo {
+    width: 140px;
+    height: 140px;
+    border: 2px solid #0f4f54;
+    background-color: var(--mud-palette-primary);
+}
+
+.select-login-right {
+    min-height: 420px;
+    background-color: var(--mud-palette-primary);
+}
+
+.select-login-button {
+    height: 52px;
+    font-size: 1.25rem;
 }
