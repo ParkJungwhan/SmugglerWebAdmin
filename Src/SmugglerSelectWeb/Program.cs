@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
 using SmugglerSelectWeb.Components;
@@ -15,7 +16,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
-builder.Services.AddDataProtection();
+builder.Services.AddDataProtection()
+    .SetApplicationName("SmugglerWebAdmin.Shared");
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<UserRepository>();
@@ -68,4 +70,3 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
-
