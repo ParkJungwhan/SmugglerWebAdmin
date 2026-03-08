@@ -8,14 +8,14 @@ namespace SmugglerSelectWeb.Services.Auth;
 
 public interface IRegionHandoffTokenService
 {
-    string CreateToken(ClaimsPrincipal user, string regionCode, TimeSpan lifetime);
+    string CreateToken(ClaimsPrincipal user, int regionCode, TimeSpan lifetime);
 }
 
 public sealed class RegionHandoffTokenService(IDataProtectionProvider dataProtectionProvider) : IRegionHandoffTokenService
 {
     private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector("Smuggler.Region.Handoff.v1");
 
-    public string CreateToken(ClaimsPrincipal user, string regionCode, TimeSpan lifetime)
+    public string CreateToken(ClaimsPrincipal user, int regionCode, TimeSpan lifetime)
     {
         var now = DateTimeOffset.UtcNow;
         var context = new RegionAccessContext
