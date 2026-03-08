@@ -35,7 +35,7 @@
                         <MudStack Spacing="2">
                             @foreach (var region in group.Regions)
                             {
-                                <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!region.CanAccess)" Href="@($"/regions/enter/{region.RegionCode}")">
+                                <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!region.CanAccess)" Href="@($"/regions/enter/{region.RegionCode}")" Target="_blank">
                                     @region.RegionName
                                 </MudButton>
                             }
@@ -86,3 +86,4 @@
 
     private sealed record RegionGroup(int X, int Y, IReadOnlyList<RegionOption> Regions);
 }
+
