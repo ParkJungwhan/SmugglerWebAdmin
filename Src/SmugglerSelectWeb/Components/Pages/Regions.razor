@@ -16,6 +16,15 @@
 <PageTitle>Region Select</PageTitle>
 
 <div class="select-stage">
+    <div class="region-topbar">
+        <div class="region-top-title">Region Selection</div>
+        <form action="Account/Logout" method="post">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="Account/Login" />
+            <button type="submit" class="btn region-logout-btn">Logout</button>
+        </form>
+    </div>
+
     @if (_groups.Count == 0)
     {
         <p class="text-light">조회 가능한 리전이 없습니다.</p>
