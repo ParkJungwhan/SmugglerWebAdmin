@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "새 프로필",
+    "Projects": [
+      {
+        "Path": "Src\\SmugglerSelectWeb\\SmugglerSelectWeb.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "Src\\SmugglerWebTool\\SmugglerWebTool.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
+  }
+]
