@@ -5,7 +5,7 @@ using SmugglerWebCommon.Data;
 namespace SmugglerWebTool.Data;
 
 public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
-    : IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser>, IUserSecurityStampStore<ApplicationUser>
+    : IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser>
 {
     public void Dispose()
     {
@@ -17,41 +17,19 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
         ArgumentNullException.ThrowIfNull(user);
 
         user.Id = string.IsNullOrWhiteSpace(user.Id) ? Guid.NewGuid().ToString("N") : user.Id;
-        user.SecurityStamp = string.IsNullOrWhiteSpace(user.SecurityStamp) ? Guid.NewGuid().ToString("N") : user.SecurityStamp;
 
         const string sql = """
-            INSERT INTO users (
-                id,
-                user_name,
-                normalized_user_name,
-                email,
-                normalized_email,
-                email_confirmed,
-                password_hash,
-                security_stamp
-            ) VALUES (
-                @Id,
-                @UserName,
-                @NormalizedUserName,
-                @Email,
-                @NormalizedEmail,
-                @EmailConfirmed,
-                @PasswordHash,
-                @SecurityStamp
-            );
+            INSERT INTO users (user_id, user_name, user_email, user_ps)
+            VALUES (@UserId, @UserName, @UserEmail, @UserPs);
             """;
 
         using var connection = connectionFactory.CreateConnection();
         await connection.ExecuteAsync(sql, new
         {
-            user.Id,
-            user.UserName,
-            user.NormalizedUserName,
-            user.Email,
-            user.NormalizedEmail,
-            user.EmailConfirmed,
-            user.PasswordHash,
-            user.SecurityStamp
+            UserId = user.Id,
+            UserName = user.UserName,
+            UserEmail = user.Email,
+            UserPs = user.PasswordHash
         });
 
         return IdentityResult.Success;
@@ -66,26 +44,18 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
             UPDATE users
             SET
                 user_name = @UserName,
-                normalized_user_name = @NormalizedUserName,
-                email = @Email,
-                normalized_email = @NormalizedEmail,
-                email_confirmed = @EmailConfirmed,
-                password_hash = @PasswordHash,
-                security_stamp = @SecurityStamp
-            WHERE id = @Id;
+                user_email = @UserEmail,
+                user_ps = @UserPs
+            WHERE user_id = @UserId;
             """;
 
         using var connection = connectionFactory.CreateConnection();
         var affected = await connection.ExecuteAsync(sql, new
         {
-            user.Id,
-            user.UserName,
-            user.NormalizedUserName,
-            user.Email,
-            user.NormalizedEmail,
-            user.EmailConfirmed,
-            user.PasswordHash,
-            user.SecurityStamp
+            UserId = user.Id,
+            UserName = user.UserName,
+            UserEmail = user.Email,
+            UserPs = user.PasswordHash
         });
 
         return affected == 1
@@ -98,10 +68,10 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(user);
 
-        const string sql = "DELETE FROM users WHERE id = @Id;";
+        const string sql = "DELETE FROM users WHERE user_id = @UserId;";
 
         using var connection = connectionFactory.CreateConnection();
-        var affected = await connection.ExecuteAsync(sql, new { user.Id });
+        var affected = await connection.ExecuteAsync(sql, new { UserId = user.Id });
 
         return affected == 1
             ? IdentityResult.Success
@@ -114,16 +84,15 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
 
         const string sql = """
             SELECT
-                id AS Id,
+                user_id AS Id,
                 user_name AS UserName,
-                normalized_user_name AS NormalizedUserName,
-                email AS Email,
-                normalized_email AS NormalizedEmail,
-                email_confirmed AS EmailConfirmed,
-                password_hash AS PasswordHash,
-                security_stamp AS SecurityStamp
+                UPPER(user_name) AS NormalizedUserName,
+                user_email AS Email,
+                UPPER(user_email) AS NormalizedEmail,
+                TRUE AS EmailConfirmed,
+                user_ps AS PasswordHash
             FROM users
-            WHERE id = @UserId;
+            WHERE user_id = @UserId;
             """;
 
         using var connection = connectionFactory.CreateConnection();
@@ -136,16 +105,15 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
 
         const string sql = """
             SELECT
-                id AS Id,
+                user_id AS Id,
                 user_name AS UserName,
-                normalized_user_name AS NormalizedUserName,
-                email AS Email,
-                normalized_email AS NormalizedEmail,
-                email_confirmed AS EmailConfirmed,
-                password_hash AS PasswordHash,
-                security_stamp AS SecurityStamp
+                UPPER(user_name) AS NormalizedUserName,
+                user_email AS Email,
+                UPPER(user_email) AS NormalizedEmail,
+                TRUE AS EmailConfirmed,
+                user_ps AS PasswordHash
             FROM users
-            WHERE normalized_user_name = @NormalizedUserName;
+            WHERE UPPER(user_name) = @NormalizedUserName;
             """;
 
         using var connection = connectionFactory.CreateConnection();
@@ -219,13 +187,12 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
     public Task<bool> GetEmailConfirmedAsync(ApplicationUser user, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(user.EmailConfirmed);
+        return Task.FromResult(true);
     }
 
     public Task SetEmailConfirmedAsync(ApplicationUser user, bool confirmed, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        user.EmailConfirmed = confirmed;
         return Task.CompletedTask;
     }
 
@@ -235,16 +202,15 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
 
         const string sql = """
             SELECT
-                id AS Id,
+                user_id AS Id,
                 user_name AS UserName,
-                normalized_user_name AS NormalizedUserName,
-                email AS Email,
-                normalized_email AS NormalizedEmail,
-                email_confirmed AS EmailConfirmed,
-                password_hash AS PasswordHash,
-                security_stamp AS SecurityStamp
+                UPPER(user_name) AS NormalizedUserName,
+                user_email AS Email,
+                UPPER(user_email) AS NormalizedEmail,
+                TRUE AS EmailConfirmed,
+                user_ps AS PasswordHash
             FROM users
-            WHERE normalized_email = @NormalizedEmail;
+            WHERE UPPER(user_email) = @NormalizedEmail;
             """;
 
         using var connection = connectionFactory.CreateConnection();
@@ -263,18 +229,4 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
         user.NormalizedEmail = normalizedEmail;
         return Task.CompletedTask;
     }
-
-    public Task SetSecurityStampAsync(ApplicationUser user, string? stamp, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        user.SecurityStamp = stamp;
-        return Task.CompletedTask;
-    }
-
-    public Task<string?> GetSecurityStampAsync(ApplicationUser user, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(user.SecurityStamp);
-    }
 }
-

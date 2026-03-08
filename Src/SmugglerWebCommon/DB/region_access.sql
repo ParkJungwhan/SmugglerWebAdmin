@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS user_regions (
     region_code TEXT NOT NULL,
     role_name TEXT NULL,
     PRIMARY KEY (user_id, region_code),
-    CONSTRAINT fk_user_regions_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_regions_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     CONSTRAINT fk_user_regions_regions FOREIGN KEY (region_code) REFERENCES regions(region_code) ON DELETE CASCADE
 );
