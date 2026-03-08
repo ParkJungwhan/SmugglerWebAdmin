@@ -15,46 +15,50 @@
 
 <PageTitle>Region Select</PageTitle>
 
-<h1>운영 리전 선택</h1>
-<p>권한이 있는 리전을 선택하면 SmugglerWebTool로 이동합니다.</p>
+<div class="select-stage">
+    @if (_groups.Count == 0)
+    {
+        <p class="text-light">조회 가능한 리전이 없습니다.</p>
+    }
+    else
+    {
+        <div class="region-shell">
+            @for (var i = 0; i < _groups.Count; i++)
+            {
+                <section class="region-service-card">
+                    <h2 class="region-title">Service @(i + 1) - Region</h2>
 
-@if (_regions.Count == 0)
-{
-    <p>조회 가능한 리전이 없습니다.</p>
-}
-else
-{
-    <div class="list-group">
-        @foreach (var region in _regions)
-        {
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="fw-bold">@region.RegionName</div>
-                    <div class="text-muted">@region.RegionCode</div>
-                </div>
-                @if (region.CanAccess)
-                {
-                    <button class="btn btn-primary" @onclick="() => EnterRegionAsync(region)">입장</button>
-                }
-                else
-                {
-                    <span class="badge text-bg-secondary">권한 없음</span>
-                }
-            </div>
-        }
-    </div>
-}
+                    @foreach (var region in _groups[i])
+                    {
+                        <button class="btn region-env-btn" disabled="@(!region.CanAccess)" @onclick="() => EnterRegionAsync(region)">
+                            @region.RegionName
+                        </button>
+                    }
+                </section>
+            }
+        </div>
+    }
+</div>
 
 @code {
-    private readonly List<RegionOption> _regions = [];
+    private readonly List<List<RegionOption>> _groups = [];
 
     [CascadingParameter]
     public HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        var regions = await RegionAccessService.GetAvailableRegionsAsync(HttpContext.User);
-        _regions.AddRange(regions);
+        var regions = (await RegionAccessService.GetAvailableRegionsAsync(HttpContext.User)).ToList();
+        if (regions.Count == 0)
+        {
+            return;
+        }
+
+        const int chunkSize = 4;
+        for (var i = 0; i < regions.Count; i += chunkSize)
+        {
+            _groups.Add(regions.Skip(i).Take(chunkSize).ToList());
+        }
     }
 
     private async Task EnterRegionAsync(RegionOption region)
