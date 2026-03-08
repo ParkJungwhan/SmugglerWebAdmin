@@ -9,21 +9,25 @@
 
 <PageTitle>Dashboard</PageTitle>
 
-<h1>Dashboard</h1>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+    <MudPaper Class="pa-6" Elevation="4">
+        <MudText Typo="Typo.h4" Class="mb-3">Dashboard</MudText>
 
-@if (_context is null)
-{
-    <p>현재 연결된 리전 컨텍스트가 없습니다. SelectWeb에서 리전을 선택해 진입하세요.</p>
-}
-else
-{
-    <div class="card p-3">
-        <div><strong>User:</strong> @_context.Email</div>
-        <div><strong>Region:</strong> @_context.RegionCode</div>
-        <div><strong>Role:</strong> @_context.Role</div>
-        <div><strong>Session Expires(Utc):</strong> @_context.ExpiresAtUtc</div>
-    </div>
-}
+        @if (_context is null)
+        {
+            <MudAlert Severity="Severity.Warning">현재 연결된 리전 컨텍스트가 없습니다. SelectWeb에서 리전을 선택해 진입하세요.</MudAlert>
+        }
+        else
+        {
+            <MudStack Spacing="1">
+                <MudText>User: @_context.Email</MudText>
+                <MudText>Region: @_context.RegionCode</MudText>
+                <MudText>Role: @_context.Role</MudText>
+                <MudText>Session Expires(Utc): @_context.ExpiresAtUtc</MudText>
+            </MudStack>
+        }
+    </MudPaper>
+</MudContainer>
 
 @code {
     [CascadingParameter]

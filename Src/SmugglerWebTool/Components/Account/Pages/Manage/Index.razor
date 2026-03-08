@@ -10,27 +10,22 @@
 
 <PageTitle>Profile</PageTitle>
 
-<h3>Profile</h3>
-<StatusMessage />
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudPaper Class="pa-6" Elevation="4">
+        <MudText Typo="Typo.h5" Class="mb-2">Profile</MudText>
+        <StatusMessage />
 
-<div class="row">
-    <div class="col-xl-6">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <input type="text" value="@username" id="username" class="form-control" disabled />
-                <label for="username" class="form-label">Username</label>
-            </div>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="email" />
-                <label for="Input.Email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            <ValidationSummary class="text-danger mb-3" role="alert" />
+
+            <MudTextField Value="@username" Label="Username" Variant="Variant.Filled" Disabled="true" Class="mb-2" />
+            <MudTextField @bind-Value="Input.Email" Label="Email" Variant="Variant.Filled" InputType="InputType.Email" Class="mb-4" />
+
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Save</MudButton>
         </EditForm>
-    </div>
-</div>
+    </MudPaper>
+</MudContainer>
 
 @code {
     private ApplicationUser? user;
@@ -95,4 +90,3 @@
         public string Email { get; set; } = string.Empty;
     }
 }
-

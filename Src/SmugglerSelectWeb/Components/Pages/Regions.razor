@@ -15,39 +15,42 @@
 
 <PageTitle>Region Select</PageTitle>
 
-<div class="select-stage">
-    <div class="region-topbar">
-        <div class="region-top-title">Region Selection</div>
-        <form action="Account/Logout" method="post">
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+        <MudText Typo="Typo.h4" Class="text-light">Region Selection</MudText>
+        <form action="/Account/Logout" method="post">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="Account/Login" />
-            <button type="submit" class="btn region-logout-btn">Logout</button>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout">Logout</MudButton>
         </form>
-    </div>
+    </MudStack>
 
     @if (_groups.Count == 0)
     {
-        <p class="text-light">조회 가능한 리전이 없습니다.</p>
+        <MudAlert Severity="Severity.Info">조회 가능한 리전이 없습니다.</MudAlert>
     }
     else
     {
-        <div class="region-shell">
+        <MudGrid Spacing="3">
             @for (var i = 0; i < _groups.Count; i++)
             {
-                <section class="region-service-card">
-                    <h2 class="region-title">Service @(i + 1) - Region</h2>
-
-                    @foreach (var region in _groups[i])
-                    {
-                        <button class="btn region-env-btn" disabled="@(!region.CanAccess)" @onclick="() => EnterRegionAsync(region)">
-                            @region.RegionName
-                        </button>
-                    }
-                </section>
+                <MudItem xs="12" md="6">
+                    <MudPaper Class="pa-4" Elevation="4">
+                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Service @(i + 1) - Region</MudText>
+                        <MudStack Spacing="2">
+                            @foreach (var region in _groups[i])
+                            {
+                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!region.CanAccess)" OnClick="() => EnterRegionAsync(region)">
+                                    @region.RegionName
+                                </MudButton>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
             }
-        </div>
+        </MudGrid>
     }
-</div>
+</MudContainer>
 
 @code {
     private readonly List<List<RegionOption>> _groups = [];

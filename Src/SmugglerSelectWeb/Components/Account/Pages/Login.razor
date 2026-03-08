@@ -14,31 +14,33 @@
 
 <PageTitle>Log in</PageTitle>
 
-<div class="select-stage">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
     <StatusMessage Message="@errorMessage" />
 
-    <div class="login-shell">
-        <section class="login-brand">
-            <div class="login-logo">Logo</div>
-        </section>
+    <MudGrid Spacing="0" Class="login-shell mud-elevation-8">
+        <MudItem xs="12" md="6" Class="login-brand d-flex align-center justify-center">
+            <MudPaper Class="login-logo d-flex align-center justify-center" Square="true" Elevation="0">
+                <MudText Typo="Typo.h3" Color="Color.Inherit">Logo</MudText>
+            </MudPaper>
+        </MudItem>
 
-        <section class="login-form-panel">
+        <MudItem xs="12" md="6" Class="login-form-panel">
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
-                <ValidationSummary class="text-danger mb-2" role="alert" />
+                <ValidationSummary class="text-danger mb-3" role="alert" />
 
-                <label for="Input.Email" class="form-label fs-3 mb-1">ID</label>
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control mb-3" autocomplete="username" />
+                <MudText Typo="Typo.h6" Class="mb-1">ID</MudText>
+                <MudTextField @bind-Value="Input.Email" Variant="Variant.Filled" Class="mb-3" InputType="InputType.Email" />
 
-                <label for="Input.Password" class="form-label fs-3 mb-1">Password</label>
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control mb-3" autocomplete="current-password" />
+                <MudText Typo="Typo.h6" Class="mb-1">Password</MudText>
+                <MudTextField @bind-Value="Input.Password" Variant="Variant.Filled" Class="mb-4" InputType="InputType.Password" />
 
-                <button type="submit" class="btn login-action w-100 mb-2">Login</button>
-                <a class="btn login-action secondary w-100" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register</a>
+                <MudButton ButtonType="ButtonType.Submit" FullWidth="true" Variant="Variant.Filled" Class="login-action mb-2">Login</MudButton>
+                <MudButton FullWidth="true" Variant="Variant.Outlined" Class="login-action secondary" Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register</MudButton>
             </EditForm>
-        </section>
-    </div>
-</div>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
     private string? errorMessage;
