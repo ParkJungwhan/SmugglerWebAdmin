@@ -10,6 +10,7 @@
 @inject IRegionAccessService RegionAccessService
 @inject IRegionHandoffTokenService RegionHandoffTokenService
 @inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @inject IConfiguration Configuration
 @inject NavigationManager NavigationManager
 
@@ -18,11 +19,9 @@
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
         <MudText Typo="Typo.h4" Color="Color.Inherit">Region Selection</MudText>
-        <form action="/Account/Logout" method="post">
-            <AntiforgeryToken />
-            <input type="hidden" name="ReturnUrl" value="Account/Login" />
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Logout">Logout</MudButton>
-        </form>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout" OnClick="LogoutAsync">
+            Logout
+        </MudButton>
     </MudStack>
 
     @if (_groups.Count == 0)
@@ -71,6 +70,12 @@
         {
             _groups.Add(regions.Skip(i).Take(chunkSize).ToList());
         }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await SignInManager.SignOutAsync();
+        NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
     }
 
     private async Task EnterRegionAsync(RegionOption region)
