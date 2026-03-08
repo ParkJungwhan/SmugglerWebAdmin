@@ -1,11 +1,15 @@
 @page "/regions"
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SmugglerSelectWeb.Data
 @using SmugglerSelectWeb.Services.Auth
 @using SmugglerWebCommon.Auth.Models
 @attribute [Authorize]
 
 @inject IRegionAccessService RegionAccessService
 @inject IRegionHandoffTokenService RegionHandoffTokenService
+@inject UserManager<ApplicationUser> UserManager
 @inject IConfiguration Configuration
 @inject NavigationManager NavigationManager
 
@@ -30,7 +34,7 @@ else
                 </div>
                 @if (region.CanAccess)
                 {
-                    <button class="btn btn-primary" @onclick="() => EnterRegion(region)">입장</button>
+                    <button class="btn btn-primary" @onclick="() => EnterRegionAsync(region)">입장</button>
                 }
                 else
                 {
@@ -53,9 +57,15 @@ else
         _regions.AddRange(regions);
     }
 
-    private void EnterRegion(RegionOption region)
+    private async Task EnterRegionAsync(RegionOption region)
     {
-        var token = RegionHandoffTokenService.CreateToken(HttpContext.User, region.RegionCode, TimeSpan.FromMinutes(30));
+        var dbUser = await UserManager.GetUserAsync(HttpContext.User);
+
+        var userId = dbUser?.Id ?? HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        var email = dbUser?.Email ?? HttpContext.User.FindFirstValue(ClaimTypes.Email) ?? HttpContext.User.Identity?.Name ?? string.Empty;
+        var role = HttpContext.User.FindFirstValue(ClaimTypes.Role) ?? (dbUser?.AdminType is > 0 ? $"Admin-{dbUser.AdminType}" : "Viewer");
+
+        var token = RegionHandoffTokenService.CreateToken(userId, email, role, region.RegionCode, TimeSpan.FromMinutes(30));
         var toolBaseUrl = Configuration["Smuggler:ToolBaseUrl"] ?? "https://localhost:7152";
         var destination = $"{toolBaseUrl.TrimEnd('/')}/entry?token={Uri.EscapeDataString(token)}";
 
