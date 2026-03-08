@@ -19,8 +19,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
         user.Id = string.IsNullOrWhiteSpace(user.Id) ? Guid.NewGuid().ToString("N") : user.Id;
 
         const string sql = """
-            INSERT INTO users (user_id, user_name, user_email, user_ps)
-            VALUES (@UserId, @UserName, @UserEmail, @UserPs);
+            INSERT INTO users (user_id, user_name, user_email, user_ps, admintype)
+            VALUES (@UserId, @UserName, @UserEmail, @UserPs, @AdminType);
             """;
 
         using var connection = connectionFactory.CreateConnection();
@@ -29,7 +29,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
             UserId = user.Id,
             UserName = user.UserName,
             UserEmail = user.Email,
-            UserPs = user.PasswordHash
+            UserPs = user.PasswordHash,
+            AdminType = user.AdminType
         });
 
         return IdentityResult.Success;
@@ -45,7 +46,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
             SET
                 user_name = @UserName,
                 user_email = @UserEmail,
-                user_ps = @UserPs
+                user_ps = @UserPs,
+                admintype = @AdminType
             WHERE user_id = @UserId;
             """;
 
@@ -55,7 +57,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
             UserId = user.Id,
             UserName = user.UserName,
             UserEmail = user.Email,
-            UserPs = user.PasswordHash
+            UserPs = user.PasswordHash,
+            AdminType = user.AdminType
         });
 
         return affected == 1
@@ -90,7 +93,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
                 user_email AS Email,
                 UPPER(user_email) AS NormalizedEmail,
                 TRUE AS EmailConfirmed,
-                user_ps AS PasswordHash
+                user_ps AS PasswordHash,
+                admintype AS AdminType
             FROM users
             WHERE user_id = @UserId;
             """;
@@ -111,7 +115,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
                 user_email AS Email,
                 UPPER(user_email) AS NormalizedEmail,
                 TRUE AS EmailConfirmed,
-                user_ps AS PasswordHash
+                user_ps AS PasswordHash,
+                admintype AS AdminType
             FROM users
             WHERE UPPER(user_name) = @NormalizedUserName;
             """;
@@ -208,7 +213,8 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
                 user_email AS Email,
                 UPPER(user_email) AS NormalizedEmail,
                 TRUE AS EmailConfirmed,
-                user_ps AS PasswordHash
+                user_ps AS PasswordHash,
+                admintype AS AdminType
             FROM users
             WHERE UPPER(user_email) = @NormalizedEmail;
             """;
@@ -230,3 +236,4 @@ public sealed class DapperUserStore(IDbConnectionFactory connectionFactory)
         return Task.CompletedTask;
     }
 }
+
