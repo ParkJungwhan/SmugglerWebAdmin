@@ -15,13 +15,13 @@
 
 <PageTitle>Region Select</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
     <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-        <MudText Typo="Typo.h4" Class="text-light">Region Selection</MudText>
+        <MudText Typo="Typo.h4" Color="Color.Inherit">Region Selection</MudText>
         <form action="/Account/Logout" method="post">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="Account/Login" />
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Logout">Logout</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Logout">Logout</MudButton>
         </form>
     </MudStack>
 
@@ -35,12 +35,12 @@
             @for (var i = 0; i < _groups.Count; i++)
             {
                 <MudItem xs="12" md="6">
-                    <MudPaper Class="pa-4" Elevation="4">
-                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Service @(i + 1) - Region</MudText>
+                    <MudPaper Class="pa-4" Elevation="6" Style="background-color:var(--mud-palette-primary)">
+                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3" Color="Color.Inherit">Service @(i + 1) - Region</MudText>
                         <MudStack Spacing="2">
                             @foreach (var region in _groups[i])
                             {
-                                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!region.CanAccess)" OnClick="() => EnterRegionAsync(region)">
+                                <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!region.CanAccess)" OnClick="() => EnterRegionAsync(region)">
                                     @region.RegionName
                                 </MudButton>
                             }
