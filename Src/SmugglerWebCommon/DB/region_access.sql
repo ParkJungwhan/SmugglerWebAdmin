@@ -1,8 +1,12 @@
 -- Region authorization lookup tables
 CREATE TABLE IF NOT EXISTS regions (
     region_code INT PRIMARY KEY,
-    region_name TEXT NOT NULL
+    region_name TEXT NOT NULL,
+    address TEXT NULL
 );
+
+ALTER TABLE regions
+ADD COLUMN IF NOT EXISTS address TEXT NULL;
 
 CREATE TABLE IF NOT EXISTS user_regions (
     user_id TEXT NOT NULL,
@@ -14,12 +18,14 @@ CREATE TABLE IF NOT EXISTS user_regions (
 );
 
 -- Seed regions (1000-range)
-INSERT INTO regions (region_code, region_name) VALUES
-    (1001, 'Seoul'),
-    (1002, 'Tokyo'),
-    (1003, 'US East'),
-    (1004, 'US West')
-ON CONFLICT (region_code) DO NOTHING;
+INSERT INTO regions (region_code, region_name, address) VALUES
+    (1001, 'Seoul', 'https://localhost:7152/entry'),
+    (1002, 'Tokyo', 'https://localhost:7152/entry'),
+    (1003, 'US East', 'https://localhost:7152/entry'),
+    (1004, 'US West', 'https://localhost:7152/entry')
+ON CONFLICT (region_code) DO UPDATE
+SET region_name = EXCLUDED.region_name,
+    address = EXCLUDED.address;
 
 -- Auto-map admin users to all seeded regions (admintype != 0)
 INSERT INTO user_regions (user_id, region_code, role_name)

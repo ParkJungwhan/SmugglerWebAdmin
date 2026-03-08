@@ -24,6 +24,7 @@ public sealed class DapperRegionAccessService(IDbConnectionFactory connectionFac
             SELECT
                 r.region_code AS RegionCode,
                 r.region_name AS RegionName,
+                r.address AS Address,
                 TRUE AS CanAccess
             FROM user_regions ur
             INNER JOIN regions r ON r.region_code = ur.region_code

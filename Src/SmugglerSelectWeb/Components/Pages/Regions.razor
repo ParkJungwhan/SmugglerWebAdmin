@@ -89,9 +89,23 @@
         var role = HttpContext.User.FindFirstValue(ClaimTypes.Role) ?? (dbUser?.AdminType is > 0 ? $"Admin-{dbUser.AdminType}" : "Viewer");
 
         var token = RegionHandoffTokenService.CreateToken(userId, email, role, region.RegionCode, TimeSpan.FromMinutes(30));
-        var toolBaseUrl = Configuration["Smuggler:ToolBaseUrl"] ?? "https://localhost:7152";
-        var destination = $"{toolBaseUrl.TrimEnd('/')}/entry?token={Uri.EscapeDataString(token)}";
+        var fallbackEntryUrl = $"{(Configuration["Smuggler:ToolBaseUrl"] ?? "https://localhost:7152").TrimEnd('/')}/entry";
+        var baseDestination = string.IsNullOrWhiteSpace(region.Address) ? fallbackEntryUrl : region.Address.Trim();
+        var destination = BuildDestinationWithToken(baseDestination, token);
 
         NavigationManager.NavigateTo(destination, forceLoad: true);
+    }
+
+    private static string BuildDestinationWithToken(string baseDestination, string token)
+    {
+        var encodedToken = Uri.EscapeDataString(token);
+
+        if (baseDestination.EndsWith("?", StringComparison.Ordinal) || baseDestination.EndsWith("&", StringComparison.Ordinal))
+        {
+            return $"{baseDestination}token={encodedToken}";
+        }
+
+        var separator = baseDestination.Contains('?', StringComparison.Ordinal) ? "&" : "?";
+        return $"{baseDestination}{separator}token={encodedToken}";
     }
 }
