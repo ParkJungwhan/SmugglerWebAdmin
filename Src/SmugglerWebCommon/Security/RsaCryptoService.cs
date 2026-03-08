@@ -6,6 +6,7 @@ namespace SmugglerWebCommon.Security;
 public interface IRsaCryptoService
 {
     string EncryptWithPublicKey(string plainText);
+
     string DecryptWithPrivateKey(string cipherTextBase64);
 }
 
