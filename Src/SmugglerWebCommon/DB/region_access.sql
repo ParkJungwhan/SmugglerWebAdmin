@@ -21,10 +21,16 @@ INSERT INTO regions (region_code, region_name) VALUES
     (1004, 'US West')
 ON CONFLICT (region_code) DO NOTHING;
 
--- Seed user-region mapping examples (replace user_id values as needed)
-INSERT INTO user_regions (user_id, region_code, role_name) VALUES
-    ('admin', 1001, 'Admin'),
-    ('admin', 1002, 'Admin'),
-    ('admin', 1003, 'Admin'),
-    ('admin', 1004, 'Admin')
+-- Auto-map admin users to all seeded regions
+INSERT INTO user_regions (user_id, region_code, role_name)
+SELECT u.user_id, r.region_code, 'Admin'
+FROM users u
+CROSS JOIN regions r
+WHERE UPPER(u.user_name) IN ('ADMIN', 'ADMINISTRATOR')
+ON CONFLICT (user_id, region_code) DO NOTHING;
+
+-- Auto-map every user to default region 1001 as Viewer
+INSERT INTO user_regions (user_id, region_code, role_name)
+SELECT u.user_id, 1001, 'Viewer'
+FROM users u
 ON CONFLICT (user_id, region_code) DO NOTHING;
