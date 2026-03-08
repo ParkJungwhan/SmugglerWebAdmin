@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using MudBlazor.Services;
 using SmugglerSelectWeb.Components;
 using SmugglerSelectWeb.Components.Account;
 using SmugglerSelectWeb.Data;
@@ -38,6 +39,7 @@ builder.Services
 
 builder.Services.AddSmugglerDataAccess(builder.Configuration);
 builder.Services.AddSmugglerRsa(builder.Configuration);
+builder.Services.AddMudServices();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
@@ -59,4 +61,3 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
-
