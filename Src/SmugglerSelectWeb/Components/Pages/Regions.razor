@@ -33,15 +33,14 @@
     }
     else
     {
-        var serviceIndex = 1;
         <MudGrid Spacing="3">
             @foreach (var group in _groups)
             {
                 <MudItem xs="12" md="6">
                     <MudPaper Class="pa-4" Elevation="6" Style="background-color:var(--mud-palette-primary)">
-                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3" Color="Color.Inherit">Service @serviceIndex - Region</MudText>
+                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3" Color="Color.Inherit">Service @group.X - Region @group.Y</MudText>
                         <MudStack Spacing="2">
-                            @foreach (var region in group)
+                            @foreach (var region in group.Regions)
                             {
                                 <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!region.CanAccess)" OnClick="() => EnterRegionAsync(region)">
                                     @region.RegionName
@@ -50,15 +49,13 @@
                         </MudStack>
                     </MudPaper>
                 </MudItem>
-
-                serviceIndex++;
             }
         </MudGrid>
     }
 </MudContainer>
 
 @code {
-    private readonly List<List<RegionOption>> _groups = [];
+    private readonly List<RegionGroup> _groups = [];
 
     [CascadingParameter]
     public HttpContext HttpContext { get; set; } = default!;
@@ -73,11 +70,25 @@
             return;
         }
 
-        const int chunkSize = 4;
-        for (var i = 0; i < regions.Count; i += chunkSize)
+        var grouped = regions
+            .GroupBy(region => GetGroupKey(region.RegionCode))
+            .OrderBy(group => group.Key.X)
+            .ThenBy(group => group.Key.Y);
+
+        foreach (var group in grouped)
         {
-            _groups.Add(regions.Skip(i).Take(chunkSize).ToList());
+            _groups.Add(new RegionGroup(
+                group.Key.X,
+                group.Key.Y,
+                group.OrderBy(region => region.RegionCode).ToList()));
         }
+    }
+
+    private static (int X, int Y) GetGroupKey(int regionCode)
+    {
+        var x = regionCode / 1000;
+        var y = (regionCode / 10) % 10;
+        return (x, y);
     }
 
     private async Task EnterRegionAsync(RegionOption region)
@@ -108,4 +119,6 @@
         var separator = baseDestination.Contains('?', StringComparison.Ordinal) ? "&" : "?";
         return $"{baseDestination}{separator}token={encodedToken}";
     }
+
+    private sealed record RegionGroup(int X, int Y, IReadOnlyList<RegionOption> Regions);
 }
