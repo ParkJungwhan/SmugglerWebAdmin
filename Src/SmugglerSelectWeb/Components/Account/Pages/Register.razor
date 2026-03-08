@@ -28,9 +28,9 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger mb-3" role="alert" />
 
-            <MudTextField @bind-Value="Input.Email" Label="Email" Variant="Variant.Filled" InputType="InputType.Email" Class="mb-2" />
-            <MudTextField @bind-Value="Input.Password" Label="Password" Variant="Variant.Filled" InputType="InputType.Password" Class="mb-2" />
-            <MudTextField @bind-Value="Input.ConfirmPassword" Label="Confirm Password" Variant="Variant.Filled" InputType="InputType.Password" Class="mb-4" />
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Email</MudText>`r`n            <InputText @bind-Value="Input.Email" class="select-login-input mb-2" autocomplete="username" />
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Password</MudText>`r`n            <InputText @bind-Value="Input.Password" type="password" class="select-login-input mb-2" autocomplete="new-password" />
+            <MudText Typo="Typo.subtitle2" Class="mb-1">Confirm Password</MudText>`r`n            <InputText @bind-Value="Input.ConfirmPassword" type="password" class="select-login-input mb-4" autocomplete="new-password" />
 
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Register</MudButton>
         </EditForm>
@@ -148,3 +148,4 @@
         public string ConfirmPassword { get; set; } = "";
     }
 }
+
