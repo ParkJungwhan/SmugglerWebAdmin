@@ -33,14 +33,15 @@
     }
     else
     {
+        var serviceIndex = 1;
         <MudGrid Spacing="3">
-            @for (var i = 0; i < _groups.Count; i++)
+            @foreach (var group in _groups)
             {
                 <MudItem xs="12" md="6">
                     <MudPaper Class="pa-4" Elevation="6" Style="background-color:var(--mud-palette-primary)">
-                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3" Color="Color.Inherit">Service @(i + 1) - Region</MudText>
+                        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3" Color="Color.Inherit">Service @serviceIndex - Region</MudText>
                         <MudStack Spacing="2">
-                            @foreach (var region in _groups[i])
+                            @foreach (var region in group)
                             {
                                 <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!region.CanAccess)" OnClick="() => EnterRegionAsync(region)">
                                     @region.RegionName
@@ -49,6 +50,8 @@
                         </MudStack>
                     </MudPaper>
                 </MudItem>
+
+                serviceIndex++;
             }
         </MudGrid>
     }
@@ -63,6 +66,8 @@
     protected override async Task OnInitializedAsync()
     {
         var regions = (await RegionAccessService.GetAvailableRegionsAsync(HttpContext.User)).ToList();
+        _groups.Clear();
+
         if (regions.Count == 0)
         {
             return;
