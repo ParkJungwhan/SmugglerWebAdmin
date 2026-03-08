@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using SmugglerSelectWeb.Components;
 using SmugglerSelectWeb.Components.Account;
 using SmugglerSelectWeb.Data;
+using SmugglerSelectWeb.Services.Auth;
 using SmugglerSelectWeb.Services.DB;
 using SmugglerWebCommon.Extensions;
 
@@ -13,9 +14,12 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
+builder.Services.AddDataProtection();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IRegionAccessService, InMemoryRegionAccessService>();
+builder.Services.AddScoped<IRegionHandoffTokenService, RegionHandoffTokenService>();
 
 builder.Services.AddAuthentication(options =>
     {

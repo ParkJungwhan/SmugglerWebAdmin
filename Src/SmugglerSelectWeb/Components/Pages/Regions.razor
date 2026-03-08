@@ -1,0 +1,64 @@
+@page "/regions"
+@using Microsoft.AspNetCore.Authorization
+@using SmugglerSelectWeb.Services.Auth
+@using SmugglerWebCommon.Auth.Models
+@attribute [Authorize]
+
+@inject IRegionAccessService RegionAccessService
+@inject IRegionHandoffTokenService RegionHandoffTokenService
+@inject IConfiguration Configuration
+@inject NavigationManager NavigationManager
+
+<PageTitle>Region Select</PageTitle>
+
+<h1>운영 리전 선택</h1>
+<p>권한이 있는 리전을 선택하면 SmugglerWebTool로 이동합니다.</p>
+
+@if (_regions.Count == 0)
+{
+    <p>조회 가능한 리전이 없습니다.</p>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var region in _regions)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-bold">@region.RegionName</div>
+                    <div class="text-muted">@region.RegionCode</div>
+                </div>
+                @if (region.CanAccess)
+                {
+                    <button class="btn btn-primary" @onclick="() => EnterRegion(region)">입장</button>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">권한 없음</span>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private readonly List<RegionOption> _regions = [];
+
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var regions = await RegionAccessService.GetAvailableRegionsAsync(HttpContext.User);
+        _regions.AddRange(regions);
+    }
+
+    private void EnterRegion(RegionOption region)
+    {
+        var token = RegionHandoffTokenService.CreateToken(HttpContext.User, region.RegionCode, TimeSpan.FromMinutes(30));
+        var toolBaseUrl = Configuration["Smuggler:ToolBaseUrl"] ?? "https://localhost:7152";
+        var destination = $"{toolBaseUrl.TrimEnd('/')}/entry?token={Uri.EscapeDataString(token)}";
+
+        NavigationManager.NavigateTo(destination, forceLoad: true);
+    }
+}

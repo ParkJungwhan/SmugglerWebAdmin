@@ -4,6 +4,7 @@ using SmugglerWebCommon.Extensions;
 using SmugglerWebTool.Components;
 using SmugglerWebTool.Components.Account;
 using SmugglerWebTool.Data;
+using SmugglerWebTool.Services.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +15,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
+builder.Services.AddDataProtection();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<IRegionHandoffReader, RegionHandoffReader>();
 
 builder.Services.AddAuthentication(options =>
     {

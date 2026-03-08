@@ -1,0 +1,48 @@
+@page "/entry"
+@using SmugglerWebCommon.Auth.Models
+@using SmugglerWebTool.Services.Auth
+
+@inject IRegionHandoffReader RegionHandoffReader
+@inject NavigationManager NavigationManager
+
+<PageTitle>Tool Entry</PageTitle>
+
+<h1>SmugglerWebTool Entry</h1>
+
+@if (_context is null)
+{
+    <p class="text-danger">유효하지 않거나 만료된 진입 토큰입니다.</p>
+    <button class="btn btn-outline-secondary" @onclick="GoHome">Home</button>
+}
+else
+{
+    <div class="card p-3">
+        <div><strong>User:</strong> @_context.Email</div>
+        <div><strong>Region:</strong> @_context.RegionCode</div>
+        <div><strong>Role:</strong> @_context.Role</div>
+        <div><strong>Expires(Utc):</strong> @_context.ExpiresAtUtc</div>
+    </div>
+    <button class="btn btn-primary mt-3" @onclick="GoDashboard">대시보드로 이동</button>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+
+    private RegionAccessContext? _context;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(Token) && RegionHandoffReader.TryRead(Token, out var context))
+        {
+            _context = context;
+        }
+        else
+        {
+            _context = null;
+        }
+    }
+
+    private void GoHome() => NavigationManager.NavigateTo("/");
+    private void GoDashboard() => NavigationManager.NavigateTo("/");
+}
