@@ -1,6 +1,9 @@
 @page "/"
+@using Microsoft.AspNetCore.Authorization
 @using SmugglerWebCommon.Auth.Models
 @using SmugglerWebTool.Services.Auth
+
+@attribute [Authorize]
 
 @inject IRegionSessionService RegionSessionService
 
