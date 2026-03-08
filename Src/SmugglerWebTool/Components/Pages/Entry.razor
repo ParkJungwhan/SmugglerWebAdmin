@@ -3,6 +3,7 @@
 @using SmugglerWebTool.Services.Auth
 
 @inject IRegionHandoffReader RegionHandoffReader
+@inject IRegionSessionService RegionSessionService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Tool Entry</PageTitle>
@@ -29,13 +30,17 @@ else
     [SupplyParameterFromQuery]
     public string? Token { get; set; }
 
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
     private RegionAccessContext? _context;
 
     protected override void OnParametersSet()
     {
-        if (!string.IsNullOrWhiteSpace(Token) && RegionHandoffReader.TryRead(Token, out var context))
+        if (!string.IsNullOrWhiteSpace(Token) && RegionHandoffReader.TryRead(Token, out var context) && context is not null)
         {
             _context = context;
+            RegionSessionService.Set(HttpContext, context);
         }
         else
         {

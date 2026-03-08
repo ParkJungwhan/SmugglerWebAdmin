@@ -19,6 +19,7 @@ builder.Services.AddDataProtection();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<IRegionHandoffReader, RegionHandoffReader>();
+builder.Services.AddScoped<IRegionSessionService, RegionSessionService>();
 
 builder.Services.AddAuthentication(options =>
     {

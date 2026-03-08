@@ -10,12 +10,12 @@ using Microsoft.Extensions.Primitives;
 using SmugglerWebTool.Components.Account.Pages;
 using SmugglerWebTool.Components.Account.Pages.Manage;
 using SmugglerWebTool.Data;
+using SmugglerWebTool.Services.Auth;
 
 namespace Microsoft.AspNetCore.Routing
 {
     internal static class IdentityComponentsEndpointRouteBuilderExtensions
     {
-        // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
         public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
         {
             ArgumentNullException.ThrowIfNull(endpoints);
@@ -28,9 +28,11 @@ namespace Microsoft.AspNetCore.Routing
                 [FromForm] string provider,
                 [FromForm] string returnUrl) =>
             {
-                IEnumerable<KeyValuePair<string, StringValues>> query = [
+                IEnumerable<KeyValuePair<string, StringValues>> query =
+                [
                     new("ReturnUrl", returnUrl),
-                    new("Action", ExternalLogin.LoginCallbackAction)];
+                    new("Action", ExternalLogin.LoginCallbackAction)
+                ];
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -42,11 +44,13 @@ namespace Microsoft.AspNetCore.Routing
             });
 
             accountGroup.MapPost("/Logout", async (
-                ClaimsPrincipal user,
+                HttpContext context,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
+                [FromServices] IRegionSessionService regionSessionService,
                 [FromForm] string returnUrl) =>
             {
                 await signInManager.SignOutAsync();
+                regionSessionService.Clear(context);
                 return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 
@@ -96,7 +100,6 @@ namespace Microsoft.AspNetCore.Routing
                 [FromServices] SignInManager<ApplicationUser> signInManager,
                 [FromForm] string provider) =>
             {
-                // Clear the existing external cookie to ensure a clean login process
                 await context.SignOutAsync(IdentityConstants.ExternalScheme);
 
                 var redirectUrl = UriHelper.BuildRelative(
@@ -125,7 +128,6 @@ namespace Microsoft.AspNetCore.Routing
                 var userId = await userManager.GetUserIdAsync(user);
                 downloadLogger.LogInformation("User with ID '{UserId}' asked for their personal data.", userId);
 
-                // Only include personal data for download
                 var personalData = new Dictionary<string, string>();
                 var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
                     prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));

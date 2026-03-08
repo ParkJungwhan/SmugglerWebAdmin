@@ -1,7 +1,37 @@
-﻿@page "/"
+@page "/"
+@using SmugglerWebCommon.Auth.Models
+@using SmugglerWebTool.Services.Auth
 
-<PageTitle>Home</PageTitle>
+@inject IRegionSessionService RegionSessionService
 
-<h1>Hello, world!</h1>
+<PageTitle>Dashboard</PageTitle>
 
-Welcome to your new app.
+<h1>Dashboard</h1>
+
+@if (_context is null)
+{
+    <p>현재 연결된 리전 컨텍스트가 없습니다. SelectWeb에서 리전을 선택해 진입하세요.</p>
+}
+else
+{
+    <div class="card p-3">
+        <div><strong>User:</strong> @_context.Email</div>
+        <div><strong>Region:</strong> @_context.RegionCode</div>
+        <div><strong>Role:</strong> @_context.Role</div>
+        <div><strong>Session Expires(Utc):</strong> @_context.ExpiresAtUtc</div>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
+    private RegionAccessContext? _context;
+
+    protected override void OnParametersSet()
+    {
+        _context = RegionSessionService.TryGet(HttpContext, out var context)
+            ? context
+            : null;
+    }
+}
