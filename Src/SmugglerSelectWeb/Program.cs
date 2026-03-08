@@ -50,7 +50,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePages(async context =>
+{
+    if (context.HttpContext.Response.StatusCode == StatusCodes.Status404NotFound)
+    {
+        context.HttpContext.Response.Redirect("/not-found");
+    }
+});
+
 app.UseHttpsRedirection();
 app.UseAntiforgery();
 
