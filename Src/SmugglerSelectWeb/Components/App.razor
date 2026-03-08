@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="@Assets["SmugglerSelectWeb.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
@@ -20,7 +20,7 @@
     <MudDialogProvider />
     <MudSnackbarProvider />
 
-    <Routes />
+    <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
 
     <script src="@Assets["_framework/blazor.web.js"]"></script>
@@ -33,18 +33,6 @@
 @code {
     private readonly MudTheme _selectTheme = new()
     {
-        PaletteLight = new PaletteLight
-        {
-            Primary = "#239ea0",
-            Secondary = "#45997a",
-            Tertiary = "#e15d3d",
-            Background = "#a84b3f",
-            Surface = "#239ea0",
-            AppbarBackground = "#12393c",
-            AppbarText = "#f3f8f7",
-            TextPrimary = "#f3f8f7",
-            TextSecondary = "#e8f4f3"
-        },
         LayoutProperties = new LayoutProperties
         {
             DefaultBorderRadius = "0px"

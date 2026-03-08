@@ -1,21 +1,14 @@
 @page "/"
-@using Microsoft.AspNetCore.Components.Authorization
-
-@inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Redirecting...</PageTitle>
 
-<p class="text-light fs-4">로그인 상태를 확인하는 중입니다...</p>
-
-@code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var target = authState.User.Identity?.IsAuthenticated == true ? "/regions" : "/Account/Login";
-        NavigationManager.NavigateTo(target, forceLoad: true);
-    }
-}
+<AuthorizeView>
+    <Authorized>
+        <p class="text-light fs-4">리전 선택 화면으로 이동 중입니다...</p>
+        <RedirectToRegions />
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-light fs-4">로그인 화면으로 이동 중입니다...</p>
+        <RedirectToLoginPage />
+    </NotAuthorized>
+</AuthorizeView>
