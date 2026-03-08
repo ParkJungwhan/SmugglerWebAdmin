@@ -13,5 +13,18 @@ CREATE TABLE IF NOT EXISTS user_regions (
     CONSTRAINT fk_user_regions_regions FOREIGN KEY (region_code) REFERENCES regions(region_code) ON DELETE CASCADE
 );
 
--- Recommended 1000-range codes example
--- INSERT INTO regions(region_code, region_name) VALUES (1001, 'Seoul'), (1002, 'Tokyo');
+-- Seed regions (1000-range)
+INSERT INTO regions (region_code, region_name) VALUES
+    (1001, 'Seoul'),
+    (1002, 'Tokyo'),
+    (1003, 'US East'),
+    (1004, 'US West')
+ON CONFLICT (region_code) DO NOTHING;
+
+-- Seed user-region mapping examples (replace user_id values as needed)
+INSERT INTO user_regions (user_id, region_code, role_name) VALUES
+    ('admin', 1001, 'Admin'),
+    ('admin', 1002, 'Admin'),
+    ('admin', 1003, 'Admin'),
+    ('admin', 1004, 'Admin')
+ON CONFLICT (user_id, region_code) DO NOTHING;
