@@ -75,7 +75,7 @@
     private async Task LogoutAsync()
     {
         await SignInManager.SignOutAsync();
-        NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
+        NavigationManager.NavigateTo("/Account/Login");
     }
 
     private async Task EnterRegionAsync(RegionOption region)
@@ -93,3 +93,4 @@
         NavigationManager.NavigateTo(destination, forceLoad: true);
     }
 }
+

@@ -8,6 +8,6 @@
             ? "/"
             : $"/{relativePath}";
 
-        NavigationManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+        NavigationManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}");
     }
 }
