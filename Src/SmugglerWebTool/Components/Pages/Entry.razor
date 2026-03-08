@@ -46,6 +46,10 @@
             _context = context;
             RegionSessionService.Set(HttpContext, context);
         }
+        else if (RegionSessionService.TryGet(HttpContext, out var sessionContext) && sessionContext is not null)
+        {
+            _context = sessionContext;
+        }
         else
         {
             _context = null;
