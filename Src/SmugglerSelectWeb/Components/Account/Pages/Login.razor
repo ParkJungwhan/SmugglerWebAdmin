@@ -72,7 +72,7 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in with RSA password flow.");
-            RedirectManager.RedirectTo(string.IsNullOrWhiteSpace(ReturnUrl) ? "/regions" : ReturnUrl);
+            RedirectManager.RedirectTo(GetPostLoginReturnUrl());
             return;
         }
 
@@ -83,6 +83,16 @@
         }
 
         errorMessage = "Error: Invalid login attempt.";
+    }
+
+    private string GetPostLoginReturnUrl()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl == "/" || ReturnUrl.Equals("/Account/Login", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/regions";
+        }
+
+        return ReturnUrl;
     }
 
     private sealed class InputModel

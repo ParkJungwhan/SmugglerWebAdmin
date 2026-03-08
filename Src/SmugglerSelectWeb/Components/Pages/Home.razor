@@ -3,8 +3,18 @@
 
 @attribute [Authorize]
 
-<PageTitle>Home</PageTitle>
+@inject NavigationManager NavigationManager
 
-<h1>Hello, world!</h1>
+<PageTitle>Redirecting...</PageTitle>
 
-Welcome to your new app.
+<p class="text-light fs-4">리전 선택 화면으로 이동 중입니다...</p>
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            NavigationManager.NavigateTo("/regions");
+        }
+    }
+}
