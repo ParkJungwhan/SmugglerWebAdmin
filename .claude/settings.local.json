@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet --version)",
+      "Bash(git checkout:*)",
+      "Bash(dotnet remove:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet ef:*)",
+      "Bash(dotnet tool:*)",
+      "Bash(ASPNETCORE_ENVIRONMENT=Development dotnet ef database update)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(dotnet build:*)"
+    ]
+  }
+}
