@@ -5,6 +5,7 @@ using SmugglerWebAdmin.Client.Pages;
 using SmugglerWebAdmin.Components;
 using SmugglerWebAdmin.Components.Account;
 using SmugglerWebAdmin.Data;
+using SmugglerWebAdmin.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IRegionService, RegionService>();
 
 var app = builder.Build();
 
