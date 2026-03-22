@@ -12,7 +12,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IRegionService RegionService
 @inject ITokenService TokenService
-@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <PageTitle>환경 선택</PageTitle>
 
@@ -39,7 +39,7 @@ else
                     var isAllowed = _permittedIds.Contains(env.Id);
                     <button class="env-btn @(isAllowed ? "allowed" : "disabled")"
                             disabled="@(!isAllowed)"
-                            @onclick="() => OnEnvClick(env)">
+                            @onclick="async () => await OnEnvClick(env)">
                         @env.DisplayName
                     </button>
                 }
@@ -86,7 +86,7 @@ else
         _isLoading = false;
     }
 
-    private void OnEnvClick(RegionEnvironment env)
+    private async Task OnEnvClick(RegionEnvironment env)
     {
         if (_currentUser is null)
         {
@@ -103,7 +103,7 @@ else
 
         var token = TokenService.GenerateToken(_currentUser, _permittedIds);
         var redirectUrl = $"{env.ToolUrl.TrimEnd('/')}?token={Uri.EscapeDataString(token)}";
-        NavigationManager.NavigateTo(redirectUrl, forceLoad: true);
+        await JS.InvokeVoidAsync("open", redirectUrl, "_blank");
     }
 
     private sealed record RegionGroup(Region Region, List<RegionEnvironment> Environments);
