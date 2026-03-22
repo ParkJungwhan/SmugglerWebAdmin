@@ -1,0 +1,110 @@
+@page "/select"
+@attribute [Authorize]
+@layout SelectLayout
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SmugglerWebAdmin.Components.Layout
+@using SmugglerWebAdmin.Data
+@using SmugglerWebAdmin.Services
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject IRegionService RegionService
+@inject ITokenService TokenService
+@inject NavigationManager NavigationManager
+
+<PageTitle>환경 선택</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="text-center text-secondary py-5">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        로딩 중...
+    </div>
+}
+else if (_regionGroups.Count == 0)
+{
+    <p class="text-center text-secondary py-5">접근 가능한 환경이 없습니다.</p>
+}
+else
+{
+    foreach (var group in _regionGroups)
+    {
+        <div class="region-group mb-4">
+            <div class="region-group-title">@group.Region.DisplayName</div>
+            <div class="region-env-list">
+                @foreach (var env in group.Environments)
+                {
+                    var isAllowed = _permittedIds.Contains(env.Id);
+                    <button class="env-btn @(isAllowed ? "allowed" : "disabled")"
+                            disabled="@(!isAllowed)"
+                            @onclick="() => OnEnvClick(env)">
+                        @env.DisplayName
+                    </button>
+                }
+            </div>
+        </div>
+    }
+}
+
+@if (!string.IsNullOrEmpty(_alertMessage))
+{
+    <div class="alert alert-warning mt-3 text-center small">@_alertMessage</div>
+}
+
+@code {
+    private bool _isLoading = true;
+    private List<RegionGroup> _regionGroups = new();
+    private HashSet<int> _permittedIds = new();
+    private ApplicationUser? _currentUser;
+    private string? _alertMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var claimsUser = authState.User;
+
+        if (claimsUser.Identity?.IsAuthenticated == true)
+        {
+            _currentUser = await UserManager.GetUserAsync(claimsUser);
+        }
+
+        if (_currentUser is not null)
+        {
+            var permittedIds = await RegionService.GetPermittedEnvironmentIdsAsync(_currentUser.Id);
+            _permittedIds = permittedIds.ToHashSet();
+        }
+
+        var regions = await RegionService.GetAllActiveRegionsAsync();
+        foreach (var region in regions)
+        {
+            var envs = await RegionService.GetEnvironmentsByRegionAsync(region.Id);
+            _regionGroups.Add(new RegionGroup(region, envs.ToList()));
+        }
+
+        _isLoading = false;
+    }
+
+    private void OnEnvClick(RegionEnvironment env)
+    {
+        if (_currentUser is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(env.ToolUrl))
+        {
+            _alertMessage = $"[{env.DisplayName}] 환경은 아직 준비 중입니다.";
+            return;
+        }
+
+        _alertMessage = null;
+
+        var token = TokenService.GenerateToken(_currentUser, _permittedIds);
+        var redirectUrl = $"{env.ToolUrl.TrimEnd('/')}?token={Uri.EscapeDataString(token)}";
+        NavigationManager.NavigateTo(redirectUrl, forceLoad: true);
+    }
+
+    private sealed record RegionGroup(Region Region, List<RegionEnvironment> Environments);
+}

@@ -1,0 +1,36 @@
+@inherits LayoutComponentBase
+
+@inject NavigationManager NavigationManager
+
+<div class="select-bg">
+    <div class="select-wrapper">
+        <header class="select-header">
+            <div class="select-header-logo">
+                <span class="logo-title">Smuggler</span>
+                <span class="logo-sub">Admin</span>
+            </div>
+            <div class="select-header-user">
+                <AuthorizeView>
+                    <Authorized>
+                        <span class="user-email">@context.User.Identity?.Name</span>
+                        <form method="post" action="Account/Logout">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="ReturnUrl" value="Account/Login" />
+                            <button type="submit" class="btn-logout">로그아웃</button>
+                        </form>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </header>
+
+        <main class="select-main">
+            @Body
+        </main>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

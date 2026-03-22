@@ -1,0 +1,47 @@
+.region-group {
+    background: #16213e;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid #2d2d4e;
+}
+
+.region-group-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+}
+
+.region-env-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.env-btn {
+    padding: 0.55rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.env-btn.allowed {
+    background-color: #e94560;
+    color: white;
+}
+
+.env-btn.allowed:hover {
+    background-color: #c73652;
+    transform: translateY(-1px);
+}
+
+.env-btn.disabled {
+    background-color: #2a2a4a;
+    color: #4a4a6a;
+    cursor: not-allowed;
+}
