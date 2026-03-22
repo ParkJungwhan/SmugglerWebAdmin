@@ -17,15 +17,18 @@ namespace SmugglerWebAdmin.Data
 
             builder.Entity<ApplicationUser>()
                 .Property(u => u.CreatedAt)
-                .HasDefaultValueSql("NOW()");
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
 
             builder.Entity<UserServicePermission>()
                 .Property(p => p.CreatedAt)
-                .HasDefaultValueSql("NOW()");
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
 
             builder.Entity<UserServiceRegionPermission>()
                 .Property(p => p.CreatedAt)
-                .HasDefaultValueSql("NOW()");
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
 
             // L2: ServiceRegion → Service
             builder.Entity<ServiceRegion>()
