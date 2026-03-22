@@ -36,9 +36,7 @@ else
             <div class="region-env-list">
                 @foreach (var env in group.Environments)
                 {
-                    var isAllowed = _permittedIds.Contains(env.Id);
-                    <button class="env-btn @(isAllowed ? "allowed" : "disabled")"
-                            disabled="@(!isAllowed)"
+                    <button class="env-btn allowed"
                             @onclick="async () => await OnEnvClick(env)">
                         @env.DisplayName
                     </button>
@@ -80,7 +78,11 @@ else
         foreach (var region in regions)
         {
             var envs = await RegionService.GetEnvironmentsByRegionAsync(region.Id);
-            _regionGroups.Add(new RegionGroup(region, envs.ToList()));
+            var permittedEnvs = envs.Where(e => _permittedIds.Contains(e.Id)).ToList();
+            if (permittedEnvs.Count > 0)
+            {
+                _regionGroups.Add(new RegionGroup(region, permittedEnvs));
+            }
         }
 
         _isLoading = false;
