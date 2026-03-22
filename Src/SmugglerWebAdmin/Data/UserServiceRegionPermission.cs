@@ -14,5 +14,8 @@ namespace SmugglerWebAdmin.Data
 
         /// <summary>FK → ServiceRegions.Id</summary>
         public int ServiceRegionId { get; set; }
+
+        /// <summary>권한 부여 일시. DB 기본값 NOW().</summary>
+        public DateTime CreatedAt { get; set; }
     }
 }

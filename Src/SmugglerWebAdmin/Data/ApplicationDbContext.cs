@@ -15,6 +15,18 @@ namespace SmugglerWebAdmin.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<ApplicationUser>()
+                .Property(u => u.CreatedAt)
+                .HasDefaultValueSql("NOW()");
+
+            builder.Entity<UserServicePermission>()
+                .Property(p => p.CreatedAt)
+                .HasDefaultValueSql("NOW()");
+
+            builder.Entity<UserServiceRegionPermission>()
+                .Property(p => p.CreatedAt)
+                .HasDefaultValueSql("NOW()");
+
             // L2: ServiceRegion → Service
             builder.Entity<ServiceRegion>()
                 .HasOne<Service>()
