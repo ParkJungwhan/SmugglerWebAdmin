@@ -22,5 +22,8 @@ namespace SmugglerWebAdmin.Services
 
         /// <summary>사용자가 L2 권한을 가진 ServiceRegionId 목록을 반환합니다.</summary>
         Task<IEnumerable<int>> GetPermittedServiceRegionIdsAsync(string userId);
+
+        /// <summary>사용자가 L3 권한을 가진 RegionEnvironmentId 목록을 반환합니다.</summary>
+        Task<IEnumerable<int>> GetPermittedEnvironmentIdsAsync(string userId);
     }
 }

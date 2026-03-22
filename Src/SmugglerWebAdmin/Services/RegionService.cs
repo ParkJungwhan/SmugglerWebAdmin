@@ -77,5 +77,17 @@ namespace SmugglerWebAdmin.Services
             await using var conn = _connectionFactory.CreateConnection();
             return await conn.QueryAsync<int>(sql, new { UserId = userId });
         }
+
+        public async Task<IEnumerable<int>> GetPermittedEnvironmentIdsAsync(string userId)
+        {
+            const string sql = """
+                SELECT "RegionEnvironmentId"
+                FROM "UserRegionEnvironmentPermissions"
+                WHERE "UserId" = @UserId
+                """;
+
+            await using var conn = _connectionFactory.CreateConnection();
+            return await conn.QueryAsync<int>(sql, new { UserId = userId });
+        }
     }
 }

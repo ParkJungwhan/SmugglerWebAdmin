@@ -85,6 +85,7 @@ else
     {
         var l1Ids = (await RegionService.GetPermittedServiceIdsAsync(userId)).ToHashSet();
         var l2Ids = (await RegionService.GetPermittedServiceRegionIdsAsync(userId)).ToHashSet();
+        var l3Ids = (await RegionService.GetPermittedEnvironmentIdsAsync(userId)).ToHashSet();
 
         var services = await RegionService.GetAllActiveServicesAsync();
 
@@ -95,16 +96,22 @@ else
 
             foreach (var region in allRegions)
             {
-                // L1 권한이 있으면 전체 리전 포함, 없으면 L2 권한 있는 리전만 포함
-                if (!l1Ids.Contains(service.Id) && !l2Ids.Contains(region.Id))
+                var allEnvs = await RegionService.GetEnvironmentsByRegionAsync(region.Id);
+
+                // L1: 서비스 전체 허용 / L2: 해당 리전 전체 허용 / L3: 환경 개별 허용
+                List<RegionEnvironment> permittedEnvs;
+                if (l1Ids.Contains(service.Id) || l2Ids.Contains(region.Id))
                 {
-                    continue;
+                    permittedEnvs = allEnvs.ToList();
+                }
+                else
+                {
+                    permittedEnvs = allEnvs.Where(e => l3Ids.Contains(e.Id)).ToList();
                 }
 
-                var envs = await RegionService.GetEnvironmentsByRegionAsync(region.Id);
-                if (envs.Any())
+                if (permittedEnvs.Count > 0)
                 {
-                    regionGroups.Add(new RegionGroup(region, envs.ToList()));
+                    regionGroups.Add(new RegionGroup(region, permittedEnvs));
                 }
             }
 
