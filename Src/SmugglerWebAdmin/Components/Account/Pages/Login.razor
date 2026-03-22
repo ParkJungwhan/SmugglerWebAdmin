@@ -24,7 +24,7 @@
     <div class="mb-3">
         <label for="Input.Email" class="form-label text-light small">이메일</label>
         <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control bg-dark text-light border-secondary"
-                   autocomplete="username webauthn" placeholder="name@example.com" />
+                   autocomplete="username" placeholder="name@example.com" />
         <ValidationMessage For="() => Input.Email" class="text-danger small" />
     </div>
 
@@ -47,13 +47,6 @@
     <button type="submit" class="btn w-100 mb-3" style="background-color: #e94560; color: white; font-weight: 600;">
         로그인
     </button>
-
-    <div class="text-center mb-3">
-        <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email"
-                       class="btn btn-outline-secondary btn-sm w-100">
-            Passkey로 로그인
-        </PasskeySubmit>
-    </div>
 </EditForm>
 
 <hr class="border-secondary" />
@@ -93,26 +86,12 @@
 
     public async Task LoginUser()
     {
-        if (!string.IsNullOrEmpty(Input.Passkey?.Error))
+        if (!editContext.Validate())
         {
-            errorMessage = $"Error: {Input.Passkey.Error}";
             return;
         }
 
-        SignInResult result;
-        if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
-        {
-            result = await SignInManager.PasskeySignInAsync(Input.Passkey.CredentialJson);
-        }
-        else
-        {
-            if (!editContext.Validate())
-            {
-                return;
-            }
-
-            result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-        }
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
         if (result.Succeeded)
         {
@@ -148,7 +127,5 @@
 
         [Display(Name = "로그인 상태 유지")]
         public bool RememberMe { get; set; }
-
-        public PasskeyInputModel? Passkey { get; set; }
     }
 }
