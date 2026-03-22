@@ -52,6 +52,21 @@ namespace SmugglerWebAdmin.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Services",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    DisplayName = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Services", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -176,6 +191,103 @@ namespace SmugglerWebAdmin.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ServiceRegions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ServiceId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    DisplayName = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceRegions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ServiceRegions_Services_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Services",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserServicePermissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    ServiceId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserServicePermissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserServicePermissions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserServicePermissions_Services_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Services",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RegionEnvironments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ServiceRegionId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    DisplayName = table.Column<string>(type: "text", nullable: false),
+                    ToolUrl = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RegionEnvironments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RegionEnvironments_ServiceRegions_ServiceRegionId",
+                        column: x => x.ServiceRegionId,
+                        principalTable: "ServiceRegions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserServiceRegionPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    ServiceRegionId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserServiceRegionPermissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserServiceRegionPermissions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserServiceRegionPermissions_ServiceRegions_ServiceRegionId",
+                        column: x => x.ServiceRegionId,
+                        principalTable: "ServiceRegions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -217,6 +329,38 @@ namespace SmugglerWebAdmin.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegionEnvironments_ServiceRegionId",
+                table: "RegionEnvironments",
+                column: "ServiceRegionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ServiceRegions_ServiceId",
+                table: "ServiceRegions",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserServicePermissions_ServiceId",
+                table: "UserServicePermissions",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserServicePermissions_UserId_ServiceId",
+                table: "UserServicePermissions",
+                columns: new[] { "UserId", "ServiceId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserServiceRegionPermissions_ServiceRegionId",
+                table: "UserServiceRegionPermissions",
+                column: "ServiceRegionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserServiceRegionPermissions_UserId_ServiceRegionId",
+                table: "UserServiceRegionPermissions",
+                columns: new[] { "UserId", "ServiceRegionId" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -241,10 +385,25 @@ namespace SmugglerWebAdmin.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "RegionEnvironments");
+
+            migrationBuilder.DropTable(
+                name: "UserServicePermissions");
+
+            migrationBuilder.DropTable(
+                name: "UserServiceRegionPermissions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "ServiceRegions");
+
+            migrationBuilder.DropTable(
+                name: "Services");
         }
     }
 }

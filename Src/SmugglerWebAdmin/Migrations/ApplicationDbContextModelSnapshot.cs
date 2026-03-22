@@ -240,30 +240,6 @@ namespace SmugglerWebAdmin.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("SmugglerWebAdmin.Data.Region", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Regions");
-                });
-
             modelBuilder.Entity("SmugglerWebAdmin.Data.RegionEnvironment", b =>
                 {
                     b.Property<int>("Id")
@@ -283,7 +259,7 @@ namespace SmugglerWebAdmin.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RegionId")
+                    b.Property<int>("ServiceRegionId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ToolUrl")
@@ -292,12 +268,12 @@ namespace SmugglerWebAdmin.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RegionId");
+                    b.HasIndex("ServiceRegionId");
 
                     b.ToTable("RegionEnvironments");
                 });
 
-            modelBuilder.Entity("SmugglerWebAdmin.Data.UserRegionPermission", b =>
+            modelBuilder.Entity("SmugglerWebAdmin.Data.Service", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -305,7 +281,60 @@ namespace SmugglerWebAdmin.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("RegionEnvironmentId")
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("SmugglerWebAdmin.Data.ServiceRegion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ServiceRegions");
+                });
+
+            modelBuilder.Entity("SmugglerWebAdmin.Data.UserServicePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ServiceId")
                         .HasColumnType("integer");
 
                     b.Property<string>("UserId")
@@ -314,12 +343,37 @@ namespace SmugglerWebAdmin.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RegionEnvironmentId");
+                    b.HasIndex("ServiceId");
 
-                    b.HasIndex("UserId", "RegionEnvironmentId")
+                    b.HasIndex("UserId", "ServiceId")
                         .IsUnique();
 
-                    b.ToTable("UserRegionPermissions");
+                    b.ToTable("UserServicePermissions");
+                });
+
+            modelBuilder.Entity("SmugglerWebAdmin.Data.UserServiceRegionPermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ServiceRegionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceRegionId");
+
+                    b.HasIndex("UserId", "ServiceRegionId")
+                        .IsUnique();
+
+                    b.ToTable("UserServiceRegionPermissions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -426,18 +480,42 @@ namespace SmugglerWebAdmin.Migrations
 
             modelBuilder.Entity("SmugglerWebAdmin.Data.RegionEnvironment", b =>
                 {
-                    b.HasOne("SmugglerWebAdmin.Data.Region", null)
+                    b.HasOne("SmugglerWebAdmin.Data.ServiceRegion", null)
                         .WithMany()
-                        .HasForeignKey("RegionId")
+                        .HasForeignKey("ServiceRegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SmugglerWebAdmin.Data.UserRegionPermission", b =>
+            modelBuilder.Entity("SmugglerWebAdmin.Data.ServiceRegion", b =>
                 {
-                    b.HasOne("SmugglerWebAdmin.Data.RegionEnvironment", null)
+                    b.HasOne("SmugglerWebAdmin.Data.Service", null)
                         .WithMany()
-                        .HasForeignKey("RegionEnvironmentId")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SmugglerWebAdmin.Data.UserServicePermission", b =>
+                {
+                    b.HasOne("SmugglerWebAdmin.Data.Service", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmugglerWebAdmin.Data.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SmugglerWebAdmin.Data.UserServiceRegionPermission", b =>
+                {
+                    b.HasOne("SmugglerWebAdmin.Data.ServiceRegion", null)
+                        .WithMany()
+                        .HasForeignKey("ServiceRegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

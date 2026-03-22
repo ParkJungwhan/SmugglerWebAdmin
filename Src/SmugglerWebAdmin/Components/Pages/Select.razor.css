@@ -1,47 +1,52 @@
-.region-group {
+.service-group {
     background: #16213e;
     border-radius: 10px;
     padding: 1.25rem 1.5rem;
     border: 1px solid #2d2d4e;
 }
 
+.service-group-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #2d2d4e;
+}
+
+.region-group {
+    padding-left: 0.5rem;
+}
+
 .region-group-title {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #a0aec0;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
 }
 
 .region-env-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
 }
 
 .env-btn {
-    padding: 0.55rem 1.4rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    padding: 0.45rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
     border: none;
+    background-color: #e94560;
+    color: white;
     transition: background-color 0.2s, transform 0.1s;
 }
 
-.env-btn.allowed {
-    background-color: #e94560;
-    color: white;
-}
-
-.env-btn.allowed:hover {
+.env-btn:hover {
     background-color: #c73652;
     transform: translateY(-1px);
-}
-
-.env-btn.disabled {
-    background-color: #2a2a4a;
-    color: #4a4a6a;
-    cursor: not-allowed;
 }

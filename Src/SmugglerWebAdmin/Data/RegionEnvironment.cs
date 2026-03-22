@@ -1,14 +1,16 @@
 namespace SmugglerWebAdmin.Data
 {
     /// <summary>
-    /// 리전 내 환경(Dev/Beta/Alpha/Live 등) 정보.<br/>
-    /// 스키마 관리용 EF 엔티티. CRUD는 Dapper(RegionService)를 통해 처리.
+    /// L3 — 리전 내 환경 (e.g., "Dev", "Beta", "Alpha", "Live").<br/>
+    /// Select 페이지에서 클릭하면 Site 2를 새 탭으로 여는 단위.<br/>
+    /// 스키마 관리용 EF 엔티티. CRUD는 Dapper를 통해 처리.
     /// </summary>
     public class RegionEnvironment
     {
         public int Id { get; set; }
 
-        public int RegionId { get; set; }
+        /// <summary>FK → ServiceRegions.Id</summary>
+        public int ServiceRegionId { get; set; }
 
         /// <summary>내부 식별자 (e.g., "dev")</summary>
         public string Name { get; set; } = string.Empty;

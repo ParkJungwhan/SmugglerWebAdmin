@@ -1,10 +1,10 @@
 namespace SmugglerWebAdmin.Data
 {
     /// <summary>
-    /// 리전(서비스 영역) 정보.<br/>
-    /// 스키마 관리용 EF 엔티티. CRUD는 Dapper(RegionService)를 통해 처리.
+    /// L1 — 서비스 (최상위 그룹).<br/>
+    /// 스키마 관리용 EF 엔티티. CRUD는 Dapper를 통해 처리.
     /// </summary>
-    public class Region
+    public class Service
     {
         public int Id { get; set; }
 
