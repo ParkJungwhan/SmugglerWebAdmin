@@ -14,6 +14,7 @@
     <PackageReference Include="Npgsql" Version="10.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
     <ProjectReference Include="..\SmugglerWebAdmin.Client\SmugglerWebAdmin.Client.csproj" />
+    <ProjectReference Include="..\SmugglerWebCommon\SmugglerWebCommon.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.3" />
   </ItemGroup>
 

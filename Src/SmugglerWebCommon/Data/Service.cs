@@ -1,4 +1,4 @@
-namespace SmugglerWebAdmin.Data
+namespace SmugglerWebCommon.Data
 {
     /// <summary>
     /// L1 — 서비스 (최상위 그룹).<br/>

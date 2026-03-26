@@ -1,5 +1,7 @@
 using Dapper;
 using SmugglerWebAdmin.Data;
+using SmugglerWebCommon.Data;
+using SmugglerWebCommon.Services;
 
 namespace SmugglerWebAdmin.Services
 {

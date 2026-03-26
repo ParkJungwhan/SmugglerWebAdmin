@@ -6,6 +6,7 @@ using SmugglerWebAdmin.Components;
 using SmugglerWebAdmin.Components.Account;
 using SmugglerWebAdmin.Data;
 using SmugglerWebAdmin.Services;
+using SmugglerWebCommon.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

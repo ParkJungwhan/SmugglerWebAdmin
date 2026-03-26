@@ -1,4 +1,4 @@
-namespace SmugglerWebAdmin.Data
+namespace SmugglerWebCommon.Data
 {
     /// <summary>
     /// L3 권한 — 환경 단위 개별 접근 권한.<br/>

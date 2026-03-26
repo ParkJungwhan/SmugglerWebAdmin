@@ -1,6 +1,6 @@
-using SmugglerWebAdmin.Data;
+using SmugglerWebCommon.Data;
 
-namespace SmugglerWebAdmin.Services
+namespace SmugglerWebCommon.Services
 {
     /// <summary>
     /// 서비스/리전/환경 조회 및 사용자 권한 조회 인터페이스.<br/>

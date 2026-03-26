@@ -1,4 +1,4 @@
-namespace SmugglerWebAdmin.Data
+namespace SmugglerWebCommon.Data
 {
     /// <summary>
     /// L2 — 서비스 내 리전 (e.g., "Korea", "Japan").<br/>

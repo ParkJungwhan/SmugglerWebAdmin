@@ -1,4 +1,4 @@
-namespace SmugglerWebAdmin.Data
+namespace SmugglerWebCommon.Data
 {
     /// <summary>
     /// L3 — 리전 내 환경 (e.g., "Dev", "Beta", "Alpha", "Live").<br/>
