@@ -45,6 +45,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<AdminInitializer>();
+builder.Services.AddScoped<TestDataSeeder>();
 
 var app = builder.Build();
 
@@ -56,6 +57,9 @@ using (var scope = app.Services.CreateScope())
 
     var adminInit = scope.ServiceProvider.GetRequiredService<AdminInitializer>();
     await adminInit.InitializeAsync();
+
+    var testSeeder = scope.ServiceProvider.GetRequiredService<TestDataSeeder>();
+    await testSeeder.SeedAsync();
 }
 
 // Configure the HTTP request pipeline.
