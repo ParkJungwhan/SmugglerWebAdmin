@@ -25,7 +25,14 @@
     }
     else
     {
-        <MudText Typo="Typo.h5" Class="mb-4">유저 관리</MudText>
+        <div class="d-flex align-center justify-space-between mb-4">
+            <MudText Typo="Typo.h5">유저 관리</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                       Disabled="@(_activeChanges.Count == 0 || _isSaving)"
+                       OnClick="SaveActiveChangesAsync">
+                @(_isSaving ? "저장 중..." : $"활성 저장{(_activeChanges.Count > 0 ? $" ({_activeChanges.Count})" : "")}")
+            </MudButton>
+        </div>
 
         <MudTable Items="_users" Hover="true" Striped="true" Dense="true" Elevation="2">
             <HeaderContent>
@@ -52,8 +59,8 @@
                     }
                 </MudTd>
                 <MudTd Style="text-align:center">
-                    <MudCheckBox Value="context.IsActive"
-                                 ValueChanged="@((bool v) => ToggleActiveAsync(context, v))"
+                    <MudCheckBox Value="@GetIsActive(context)"
+                                 ValueChanged="@((bool v) => MarkActiveChange(context, v))"
                                  Color="Color.Success" Dense="true" />
                 </MudTd>
                 <MudTd Style="text-align:right">
@@ -69,7 +76,11 @@
 
 @code {
     private bool _isLoading = true;
+    private bool _isSaving = false;
     private List<ApplicationUser> _users = new();
+
+    // userId → 변경된 IsActive 값 (저장 전 대기 중인 변경)
+    private Dictionary<string, bool> _activeChanges = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,9 +96,35 @@
         _isLoading = false;
     }
 
-    private async Task ToggleActiveAsync(ApplicationUser user, bool value)
+    private bool GetIsActive(ApplicationUser user)
     {
-        user.IsActive = value;
-        await AdminService.SetActiveAsync(user.Id, value);
+        if (_activeChanges.TryGetValue(user.Id, out var pending))
+            return pending;
+        return user.IsActive;
+    }
+
+    private void MarkActiveChange(ApplicationUser user, bool value)
+    {
+        if (value == user.IsActive)
+            _activeChanges.Remove(user.Id);
+        else
+            _activeChanges[user.Id] = value;
+    }
+
+    private async Task SaveActiveChangesAsync()
+    {
+        if (_activeChanges.Count == 0) return;
+        _isSaving = true;
+
+        foreach (var (userId, isActive) in _activeChanges)
+        {
+            await AdminService.SetActiveAsync(userId, isActive);
+            var user = _users.Find(u => u.Id == userId);
+            if (user is not null)
+                user.IsActive = isActive;
+        }
+
+        _activeChanges.Clear();
+        _isSaving = false;
     }
 }
