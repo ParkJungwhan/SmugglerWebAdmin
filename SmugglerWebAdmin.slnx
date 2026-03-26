@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Src/SmugglerWebAdmin.Client/SmugglerWebAdmin.Client.csproj" />
   <Project Path="Src/SmugglerWebAdmin/SmugglerWebAdmin.csproj" />
+  <Project Path="Src/SmugglerWebCommon/SmugglerWebCommon.csproj" Id="46218315-3585-465e-85cc-afaf9f425702" />
 </Solution>
