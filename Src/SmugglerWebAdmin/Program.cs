@@ -58,8 +58,8 @@ using (var scope = app.Services.CreateScope())
     var adminInit = scope.ServiceProvider.GetRequiredService<AdminInitializer>();
     await adminInit.InitializeAsync();
 
-    var testSeeder = scope.ServiceProvider.GetRequiredService<TestDataSeeder>();
-    await testSeeder.SeedAsync();
+    //var testSeeder = scope.ServiceProvider.GetRequiredService<TestDataSeeder>();
+    //await testSeeder.SeedAsync();
 }
 
 // Configure the HTTP request pipeline.
