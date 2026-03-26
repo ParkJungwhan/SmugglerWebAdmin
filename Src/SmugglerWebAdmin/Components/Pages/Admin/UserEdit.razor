@@ -15,97 +15,99 @@
 @inject IRegionService RegionService
 @inject NavigationManager NavigationManager
 
-<PageTitle>유저 편집</PageTitle>
+<AppShell>
+    <PageTitle>유저 편집</PageTitle>
 
-@if (_isLoading)
-{
-    <div class="d-flex justify-center align-center" style="min-height: 200px;">
-        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
-    </div>
-}
-else if (_targetUser is null)
-{
-    <MudAlert Severity="Severity.Error">유저를 찾을 수 없습니다.</MudAlert>
-}
-else
-{
-    <div class="d-flex align-center gap-2 mb-4">
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="@(() => NavigationManager.NavigateTo("/admin/users"))" />
-        <MudText Typo="Typo.h5">@_targetUser.Email</MudText>
-    </div>
-
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-        가입일: @_targetUser.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
-    </MudText>
-
-    @if (_isSuperAdmin)
+    @if (_isLoading)
     {
+        <div class="d-flex justify-center align-center" style="min-height: 200px;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        </div>
+    }
+    else if (_targetUser is null)
+    {
+        <MudAlert Severity="Severity.Error">유저를 찾을 수 없습니다.</MudAlert>
+    }
+    else
+    {
+        <div class="d-flex align-center gap-2 mb-4">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="@(() => NavigationManager.NavigateTo("/admin/users"))" />
+            <MudText Typo="Typo.h5">@_targetUser.Email</MudText>
+        </div>
+
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+            가입일: @_targetUser.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+        </MudText>
+
+        @if (_isSuperAdmin)
+        {
+            <MudCard Class="mb-4" Elevation="1">
+                <MudCardHeader>
+                    <CardHeaderContent><MudText Typo="Typo.subtitle1">어드민 권한</MudText></CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudCheckBox @bind-Value="_isAdminChecked" Label="어드민" Color="Color.Primary" Class="mr-4" />
+                    <MudCheckBox @bind-Value="_isSuperAdminChecked" Label="슈퍼어드민" Color="Color.Secondary" />
+                </MudCardContent>
+            </MudCard>
+        }
+
         <MudCard Class="mb-4" Elevation="1">
             <MudCardHeader>
-                <CardHeaderContent><MudText Typo="Typo.subtitle1">어드민 권한</MudText></CardHeaderContent>
+                <CardHeaderContent><MudText Typo="Typo.subtitle1">환경 접근 권한</MudText></CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
-                <MudCheckBox @bind-Value="_isAdminChecked" Label="어드민" Color="Color.Primary" Class="mr-4" />
-                <MudCheckBox @bind-Value="_isSuperAdminChecked" Label="슈퍼어드민" Color="Color.Secondary" />
+                @foreach (var service in _services)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex align-center mb-1">
+                            <MudCheckBox Value="_l1Checked.Contains(service.Id)"
+                                         ValueChanged="@((bool v) => ToggleL1(service.Id, v))"
+                                         Color="Color.Primary" Dense="true" />
+                            <MudText Typo="Typo.subtitle2" Class="ml-1">@service.DisplayName</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="ml-2">L1</MudChip>
+                        </div>
+
+                        @foreach (var region in _regionsByService.GetValueOrDefault(service.Id, new()))
+                        {
+                            <div class="ml-4 mb-1">
+                                <div class="d-flex align-center mb-1">
+                                    <MudCheckBox Value="_l2Checked.Contains(region.Id)"
+                                                 ValueChanged="@((bool v) => ToggleL2(region.Id, v))"
+                                                 Color="Color.Secondary" Dense="true" />
+                                    <MudText Typo="Typo.body2" Class="ml-1">@region.DisplayName</MudText>
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined" Class="ml-2">L2</MudChip>
+                                </div>
+
+                                @foreach (var env in _envsByRegion.GetValueOrDefault(region.Id, new()))
+                                {
+                                    <div class="ml-4 d-flex align-center mb-1">
+                                        <MudCheckBox Value="_l3Checked.Contains(env.Id)"
+                                                     ValueChanged="@((bool v) => ToggleL3(env.Id, v))"
+                                                     Dense="true" />
+                                        <MudText Typo="Typo.body2" Class="ml-1">@env.DisplayName</MudText>
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Class="ml-2">L3</MudChip>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
             </MudCardContent>
         </MudCard>
+
+        @if (!string.IsNullOrEmpty(_saveMessage))
+        {
+            <MudAlert Severity="_saveSuccess ? Severity.Success : Severity.Error" Class="mb-3" Dense="true">
+                @_saveMessage
+            </MudAlert>
+        }
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="_isSaving">
+            @(_isSaving ? "저장 중..." : "저장")
+        </MudButton>
     }
-
-    <MudCard Class="mb-4" Elevation="1">
-        <MudCardHeader>
-            <CardHeaderContent><MudText Typo="Typo.subtitle1">환경 접근 권한</MudText></CardHeaderContent>
-        </MudCardHeader>
-        <MudCardContent>
-            @foreach (var service in _services)
-            {
-                <div class="mb-3">
-                    <div class="d-flex align-center mb-1">
-                        <MudCheckBox Value="_l1Checked.Contains(service.Id)"
-                                     ValueChanged="@((bool v) => ToggleL1(service.Id, v))"
-                                     Color="Color.Primary" Dense="true" />
-                        <MudText Typo="Typo.subtitle2" Class="ml-1">@service.DisplayName</MudText>
-                        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="ml-2">L1</MudChip>
-                    </div>
-
-                    @foreach (var region in _regionsByService.GetValueOrDefault(service.Id, new()))
-                    {
-                        <div class="ml-4 mb-1">
-                            <div class="d-flex align-center mb-1">
-                                <MudCheckBox Value="_l2Checked.Contains(region.Id)"
-                                             ValueChanged="@((bool v) => ToggleL2(region.Id, v))"
-                                             Color="Color.Secondary" Dense="true" />
-                                <MudText Typo="Typo.body2" Class="ml-1">@region.DisplayName</MudText>
-                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined" Class="ml-2">L2</MudChip>
-                            </div>
-
-                            @foreach (var env in _envsByRegion.GetValueOrDefault(region.Id, new()))
-                            {
-                                <div class="ml-4 d-flex align-center mb-1">
-                                    <MudCheckBox Value="_l3Checked.Contains(env.Id)"
-                                                 ValueChanged="@((bool v) => ToggleL3(env.Id, v))"
-                                                 Dense="true" />
-                                    <MudText Typo="Typo.body2" Class="ml-1">@env.DisplayName</MudText>
-                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Class="ml-2">L3</MudChip>
-                                </div>
-                            }
-                        </div>
-                    }
-                </div>
-            }
-        </MudCardContent>
-    </MudCard>
-
-    @if (!string.IsNullOrEmpty(_saveMessage))
-    {
-        <MudAlert Severity="_saveSuccess ? Severity.Success : Severity.Error" Class="mb-3" Dense="true">
-            @_saveMessage
-        </MudAlert>
-    }
-
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="_isSaving">
-        @(_isSaving ? "저장 중..." : "저장")
-    </MudButton>
-}
+</AppShell>
 
 @code {
     [Parameter] public string Id { get; set; } = "";

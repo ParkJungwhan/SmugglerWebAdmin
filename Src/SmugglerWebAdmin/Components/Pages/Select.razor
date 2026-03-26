@@ -15,57 +15,58 @@
 @inject ITokenService TokenService
 @inject IJSRuntime JS
 
-<PageTitle>환경 선택</PageTitle>
+<AppShell>
+    <PageTitle>환경 선택</PageTitle>
 
-@if (_isLoading)
-{
-    <div class="d-flex justify-center align-center" style="min-height: 200px;">
-        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
-    </div>
-}
-else if (_serviceGroups.Count == 0)
-{
-    <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8" Color="Color.Secondary">
-        접근 가능한 환경이 없습니다.
-    </MudText>
-}
-else
-{
-    @foreach (var service in _serviceGroups)
+    @if (_isLoading)
     {
-        <MudCard Class="mb-4" Elevation="2">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">@service.Service.DisplayName</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                @foreach (var region in service.Regions)
-                {
-                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary" Class="mb-2">@region.Region.DisplayName</MudText>
-                    <div class="d-flex flex-wrap gap-2 mb-4">
-                        @foreach (var env in region.Environments)
-                        {
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                                       OnClick="async () => await OnEnvClick(env)">
-                                @env.DisplayName
-                            </MudButton>
-                        }
-                    </div>
-                }
-            </MudCardContent>
-        </MudCard>
+        <div class="d-flex justify-center align-center" style="min-height: 200px;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        </div>
     }
-}
+    else if (_serviceGroups.Count == 0)
+    {
+        <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8" Color="Color.Secondary">
+            접근 가능한 환경이 없습니다.
+        </MudText>
+    }
+    else
+    {
+        @foreach (var service in _serviceGroups)
+        {
+            <MudCard Class="mb-4" Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@service.Service.DisplayName</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    @foreach (var region in service.Regions)
+                    {
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary" Class="mb-2">@region.Region.DisplayName</MudText>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            @foreach (var env in region.Environments)
+                            {
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                           OnClick="async () => await OnEnvClick(env)">
+                                    @env.DisplayName
+                                </MudButton>
+                            }
+                        </div>
+                    }
+                </MudCardContent>
+            </MudCard>
+        }
+    }
 
-@if (!string.IsNullOrEmpty(_alertMessage))
-{
-    <MudAlert Severity="Severity.Warning" Class="mt-3" ShowCloseIcon="true"
-              CloseIconClicked="@(() => _alertMessage = null)">
-        @_alertMessage
-    </MudAlert>
-}
-
+    @if (!string.IsNullOrEmpty(_alertMessage))
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-3" ShowCloseIcon="true"
+                  CloseIconClicked="@(() => _alertMessage = null)">
+            @_alertMessage
+        </MudAlert>
+    }
+</AppShell>
 
 @code {
     private bool _isLoading = true;

@@ -13,7 +13,8 @@
       "Bash(git push:*)",
       "Bash(dotnet build:*)",
       "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -t:Restore -p:Configuration=Debug)",
-      "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -p:Configuration=Debug)"
+      "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -p:Configuration=Debug)",
+      "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -t:Build -p:Configuration=Debug -v:minimal)"
     ]
   }
 }
