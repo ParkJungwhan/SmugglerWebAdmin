@@ -20,6 +20,9 @@ public interface IAdminService
     /// <summary>MustChangePassword 플래그 설정.</summary>
     Task SetMustChangePasswordAsync(string userId, bool value);
 
+    /// <summary>IsActive 플래그 설정.</summary>
+    Task SetActiveAsync(string userId, bool isActive);
+
     /// <summary>
     /// 유저의 L1/L2/L3 권한을 일괄 교체.<br/>
     /// 기존 권한을 모두 삭제한 뒤 새 권한을 삽입합니다.

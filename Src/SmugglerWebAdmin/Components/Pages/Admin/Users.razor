@@ -33,6 +33,7 @@
                 <MudTh>가입일</MudTh>
                 <MudTh Style="text-align:center">어드민</MudTh>
                 <MudTh Style="text-align:center">슈퍼어드민</MudTh>
+                <MudTh Style="text-align:center">활성</MudTh>
                 <MudTh></MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -49,6 +50,11 @@
                     {
                         <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Secondary" Size="Size.Small" />
                     }
+                </MudTd>
+                <MudTd Style="text-align:center">
+                    <MudCheckBox Value="context.IsActive"
+                                 ValueChanged="@((bool v) => ToggleActiveAsync(context, v))"
+                                 Color="Color.Success" Dense="true" />
                 </MudTd>
                 <MudTd Style="text-align:right">
                     <MudButton Variant="Variant.Outlined" Size="Size.Small"
@@ -77,5 +83,11 @@
 
         _users = await AdminService.GetAllUsersAsync();
         _isLoading = false;
+    }
+
+    private async Task ToggleActiveAsync(ApplicationUser user, bool value)
+    {
+        user.IsActive = value;
+        await AdminService.SetActiveAsync(user.Id, value);
     }
 }

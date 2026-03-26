@@ -135,9 +135,10 @@ namespace SmugglerWebAdmin.Data
             // 기존 DB에 새 컬럼이 없을 경우 추가 (멱등)
             await conn.ExecuteAsync("""
                 ALTER TABLE "AspNetUsers"
-                    ADD COLUMN IF NOT EXISTS "IsAdmin"           boolean NOT NULL DEFAULT false,
-                    ADD COLUMN IF NOT EXISTS "IsSuperAdmin"      boolean NOT NULL DEFAULT false,
-                    ADD COLUMN IF NOT EXISTS "MustChangePassword" boolean NOT NULL DEFAULT false;
+                    ADD COLUMN IF NOT EXISTS "IsAdmin"            boolean NOT NULL DEFAULT false,
+                    ADD COLUMN IF NOT EXISTS "IsSuperAdmin"       boolean NOT NULL DEFAULT false,
+                    ADD COLUMN IF NOT EXISTS "MustChangePassword" boolean NOT NULL DEFAULT false,
+                    ADD COLUMN IF NOT EXISTS "IsActive"           boolean NOT NULL DEFAULT true;
                 """);
         }
     }

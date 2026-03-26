@@ -16,6 +16,9 @@ namespace SmugglerWebAdmin.Data
 
         /// <summary>강제 비밀번호 변경 플래그. true이면 로그인 후 비밀번호 변경 페이지로 이동.</summary>
         public bool MustChangePassword { get; set; }
+
+        /// <summary>계정 활성화 여부. false이면 로그인 불가.</summary>
+        public bool IsActive { get; set; } = true;
     }
 
 }

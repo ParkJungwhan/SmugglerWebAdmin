@@ -53,6 +53,14 @@ public class AdminService : IAdminService
             new { Value = value, Id = userId });
     }
 
+    public async Task SetActiveAsync(string userId, bool isActive)
+    {
+        await using var conn = _connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(
+            """UPDATE "AspNetUsers" SET "IsActive" = @IsActive WHERE "Id" = @Id""",
+            new { IsActive = isActive, Id = userId });
+    }
+
     public async Task SetUserPermissionsAsync(
         string userId,
         IEnumerable<int> l1ServiceIds,

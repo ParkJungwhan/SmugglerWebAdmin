@@ -39,6 +39,15 @@
             가입일: @_targetUser.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
         </MudText>
 
+        <MudCard Class="mb-4" Elevation="1">
+            <MudCardHeader>
+                <CardHeaderContent><MudText Typo="Typo.subtitle1">계정 상태</MudText></CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudCheckBox @bind-Value="_isActiveChecked" Label="활성" Color="Color.Success" />
+            </MudCardContent>
+        </MudCard>
+
         @if (_isSuperAdmin)
         {
             <MudCard Class="mb-4" Elevation="1">
@@ -119,6 +128,9 @@
     private string? _saveMessage;
     private bool _saveSuccess;
 
+    // 계정 상태 편집용
+    private bool _isActiveChecked;
+
     // 어드민 플래그 편집용
     private bool _isAdminChecked;
     private bool _isSuperAdminChecked;
@@ -151,6 +163,7 @@
             return;
         }
 
+        _isActiveChecked = _targetUser.IsActive;
         _isAdminChecked = _targetUser.IsAdmin;
         _isSuperAdminChecked = _targetUser.IsSuperAdmin;
 
@@ -228,6 +241,8 @@
 
         try
         {
+            await AdminService.SetActiveAsync(_targetUser.Id, _isActiveChecked);
+
             if (_isSuperAdmin)
             {
                 await AdminService.SetAdminAsync(_targetUser.Id, _isAdminChecked);
