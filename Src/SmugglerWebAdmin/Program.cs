@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using MudBlazor.Services;
 using SmugglerWebAdmin.Client.Pages;
 using SmugglerWebAdmin.Components;
 using SmugglerWebAdmin.Components.Account;
@@ -33,19 +34,27 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+builder.Services.AddMudServices();
+builder.Services.AddScoped<ThemeService>();
+
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddSingleton<SchemaInitializer>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegionService, RegionService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<AdminInitializer>();
 
 var app = builder.Build();
 
-// DB 스키마 초기화
+// DB 스키마 초기화 및 초기 어드민 계정 생성
 using (var scope = app.Services.CreateScope())
 {
-    var initializer = scope.ServiceProvider.GetRequiredService<SchemaInitializer>();
-    await initializer.InitializeAsync();
+    var schemaInit = scope.ServiceProvider.GetRequiredService<SchemaInitializer>();
+    await schemaInit.InitializeAsync();
+
+    var adminInit = scope.ServiceProvider.GetRequiredService<AdminInitializer>();
+    await adminInit.InitializeAsync();
 }
 
 // Configure the HTTP request pipeline.

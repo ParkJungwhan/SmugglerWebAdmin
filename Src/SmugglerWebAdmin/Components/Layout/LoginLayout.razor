@@ -1,17 +1,20 @@
 @inherits LayoutComponentBase
 
-<div class="login-bg">
-    <div class="login-card">
-        <div class="login-logo">
-            <span class="login-logo-title">Smuggler</span>
-            <span class="login-logo-sub">Admin</span>
-        </div>
-        @Body
-    </div>
-</div>
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+<MudLayout>
+    <MudMainContent>
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+            <MudPaper Elevation="4" Style="width: 100%; max-width: 420px; padding: 2rem;">
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-5">
+                    <strong style="color: var(--mud-palette-primary);">Smuggler</strong>
+                    <span> Admin</span>
+                </MudText>
+                @Body
+            </MudPaper>
+        </div>
+    </MudMainContent>
+</MudLayout>

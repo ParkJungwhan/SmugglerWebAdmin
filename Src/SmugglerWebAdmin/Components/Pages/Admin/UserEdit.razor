@@ -1,0 +1,250 @@
+@page "/admin/users/{Id}"
+@attribute [Authorize]
+@layout AppLayout
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SmugglerWebAdmin.Components.Layout
+@using SmugglerWebAdmin.Data
+@using SmugglerWebAdmin.Services
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject IAdminService AdminService
+@inject IRegionService RegionService
+@inject NavigationManager NavigationManager
+
+<PageTitle>유저 편집</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="d-flex justify-center align-center" style="min-height: 200px;">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    </div>
+}
+else if (_targetUser is null)
+{
+    <MudAlert Severity="Severity.Error">유저를 찾을 수 없습니다.</MudAlert>
+}
+else
+{
+    <div class="d-flex align-center gap-2 mb-4">
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="@(() => NavigationManager.NavigateTo("/admin/users"))" />
+        <MudText Typo="Typo.h5">@_targetUser.Email</MudText>
+    </div>
+
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+        가입일: @_targetUser.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+    </MudText>
+
+    @if (_isSuperAdmin)
+    {
+        <MudCard Class="mb-4" Elevation="1">
+            <MudCardHeader>
+                <CardHeaderContent><MudText Typo="Typo.subtitle1">어드민 권한</MudText></CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudCheckBox @bind-Value="_isAdminChecked" Label="어드민" Color="Color.Primary" Class="mr-4" />
+                <MudCheckBox @bind-Value="_isSuperAdminChecked" Label="슈퍼어드민" Color="Color.Secondary" />
+            </MudCardContent>
+        </MudCard>
+    }
+
+    <MudCard Class="mb-4" Elevation="1">
+        <MudCardHeader>
+            <CardHeaderContent><MudText Typo="Typo.subtitle1">환경 접근 권한</MudText></CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            @foreach (var service in _services)
+            {
+                <div class="mb-3">
+                    <div class="d-flex align-center mb-1">
+                        <MudCheckBox Value="_l1Checked.Contains(service.Id)"
+                                     ValueChanged="@((bool v) => ToggleL1(service.Id, v))"
+                                     Color="Color.Primary" Dense="true" />
+                        <MudText Typo="Typo.subtitle2" Class="ml-1">@service.DisplayName</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="ml-2">L1</MudChip>
+                    </div>
+
+                    @foreach (var region in _regionsByService.GetValueOrDefault(service.Id, new()))
+                    {
+                        <div class="ml-4 mb-1">
+                            <div class="d-flex align-center mb-1">
+                                <MudCheckBox Value="_l2Checked.Contains(region.Id)"
+                                             ValueChanged="@((bool v) => ToggleL2(region.Id, v))"
+                                             Color="Color.Secondary" Dense="true" />
+                                <MudText Typo="Typo.body2" Class="ml-1">@region.DisplayName</MudText>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined" Class="ml-2">L2</MudChip>
+                            </div>
+
+                            @foreach (var env in _envsByRegion.GetValueOrDefault(region.Id, new()))
+                            {
+                                <div class="ml-4 d-flex align-center mb-1">
+                                    <MudCheckBox Value="_l3Checked.Contains(env.Id)"
+                                                 ValueChanged="@((bool v) => ToggleL3(env.Id, v))"
+                                                 Dense="true" />
+                                    <MudText Typo="Typo.body2" Class="ml-1">@env.DisplayName</MudText>
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Class="ml-2">L3</MudChip>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </MudCardContent>
+    </MudCard>
+
+    @if (!string.IsNullOrEmpty(_saveMessage))
+    {
+        <MudAlert Severity="_saveSuccess ? Severity.Success : Severity.Error" Class="mb-3" Dense="true">
+            @_saveMessage
+        </MudAlert>
+    }
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="_isSaving">
+        @(_isSaving ? "저장 중..." : "저장")
+    </MudButton>
+}
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _isSuperAdmin;
+    private ApplicationUser? _targetUser;
+    private string? _saveMessage;
+    private bool _saveSuccess;
+
+    // 어드민 플래그 편집용
+    private bool _isAdminChecked;
+    private bool _isSuperAdminChecked;
+
+    // 권한 트리 데이터
+    private List<Service> _services = new();
+    private Dictionary<int, List<ServiceRegion>> _regionsByService = new();
+    private Dictionary<int, List<RegionEnvironment>> _envsByRegion = new();
+
+    // 선택된 권한 ID 세트
+    private HashSet<int> _l1Checked = new();
+    private HashSet<int> _l2Checked = new();
+    private HashSet<int> _l3Checked = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var currentUser = await UserManager.GetUserAsync(authState.User);
+        if (currentUser is null || (!currentUser.IsAdmin && !currentUser.IsSuperAdmin))
+        {
+            NavigationManager.NavigateTo("/select");
+            return;
+        }
+        _isSuperAdmin = currentUser.IsSuperAdmin;
+
+        _targetUser = await AdminService.GetUserByIdAsync(Id);
+        if (_targetUser is null)
+        {
+            _isLoading = false;
+            return;
+        }
+
+        _isAdminChecked = _targetUser.IsAdmin;
+        _isSuperAdminChecked = _targetUser.IsSuperAdmin;
+
+        // 전체 계층 로드
+        _services = (await RegionService.GetAllActiveServicesAsync()).ToList();
+        foreach (var svc in _services)
+        {
+            var regions = (await RegionService.GetRegionsByServiceAsync(svc.Id)).ToList();
+            _regionsByService[svc.Id] = regions;
+            foreach (var reg in regions)
+            {
+                _envsByRegion[reg.Id] = (await RegionService.GetEnvironmentsByRegionAsync(reg.Id)).ToList();
+            }
+        }
+
+        // 현재 권한 로드
+        _l1Checked = (await RegionService.GetPermittedServiceIdsAsync(_targetUser.Id)).ToHashSet();
+        _l2Checked = (await RegionService.GetPermittedServiceRegionIdsAsync(_targetUser.Id)).ToHashSet();
+        _l3Checked = (await RegionService.GetPermittedEnvironmentIdsAsync(_targetUser.Id)).ToHashSet();
+
+        _isLoading = false;
+    }
+
+    private void ToggleL1(int serviceId, bool value)
+    {
+        if (value)
+        {
+            _l1Checked.Add(serviceId);
+            foreach (var region in _regionsByService.GetValueOrDefault(serviceId, new()))
+            {
+                _l2Checked.Add(region.Id);
+                foreach (var env in _envsByRegion.GetValueOrDefault(region.Id, new()))
+                    _l3Checked.Add(env.Id);
+            }
+        }
+        else
+        {
+            _l1Checked.Remove(serviceId);
+            foreach (var region in _regionsByService.GetValueOrDefault(serviceId, new()))
+            {
+                _l2Checked.Remove(region.Id);
+                foreach (var env in _envsByRegion.GetValueOrDefault(region.Id, new()))
+                    _l3Checked.Remove(env.Id);
+            }
+        }
+    }
+
+    private void ToggleL2(int regionId, bool value)
+    {
+        if (value)
+        {
+            _l2Checked.Add(regionId);
+            foreach (var env in _envsByRegion.GetValueOrDefault(regionId, new()))
+                _l3Checked.Add(env.Id);
+        }
+        else
+        {
+            _l2Checked.Remove(regionId);
+            foreach (var env in _envsByRegion.GetValueOrDefault(regionId, new()))
+                _l3Checked.Remove(env.Id);
+        }
+    }
+
+    private void ToggleL3(int envId, bool value)
+    {
+        if (value) _l3Checked.Add(envId);
+        else _l3Checked.Remove(envId);
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_targetUser is null) return;
+        _isSaving = true;
+        _saveMessage = null;
+
+        try
+        {
+            if (_isSuperAdmin)
+            {
+                await AdminService.SetAdminAsync(_targetUser.Id, _isAdminChecked);
+                await AdminService.SetSuperAdminAsync(_targetUser.Id, _isSuperAdminChecked);
+            }
+
+            await AdminService.SetUserPermissionsAsync(_targetUser.Id, _l1Checked, _l2Checked, _l3Checked);
+
+            _saveMessage = "저장되었습니다.";
+            _saveSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            _saveMessage = $"저장 실패: {ex.Message}";
+            _saveSuccess = false;
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+}

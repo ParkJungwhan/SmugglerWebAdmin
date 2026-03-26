@@ -1,36 +1,105 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
-<div class="select-bg">
-    <div class="select-wrapper">
-        <header class="select-header">
-            <div class="select-header-logo">
-                <span class="logo-title">Smuggler</span>
-                <span class="logo-sub">Admin</span>
-            </div>
-            <div class="select-header-user">
-                <AuthorizeView>
-                    <Authorized>
-                        <span class="user-email">@context.User.Identity?.Name</span>
-                        <form method="post" action="Account/Logout">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="Account/Login" />
-                            <button type="submit" class="btn-logout">로그아웃</button>
-                        </form>
-                    </Authorized>
-                </AuthorizeView>
-            </div>
-        </header>
+<MudThemeProvider @ref="_themeProvider" IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-        <main class="select-main">
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudText Typo="Typo.h6">
+            <strong style="color: var(--mud-palette-primary);">Smuggler</strong>
+            <span> Admin</span>
+        </MudText>
+        <MudSpacer />
+
+        <MudTooltip Text="라이트">
+            <MudIconButton Icon="@Icons.Material.Filled.LightMode"
+                           Color="@(ThemeService.Mode == ThemeMode.Light ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetTheme(ThemeMode.Light))" />
+        </MudTooltip>
+        <MudTooltip Text="다크">
+            <MudIconButton Icon="@Icons.Material.Filled.DarkMode"
+                           Color="@(ThemeService.Mode == ThemeMode.Dark ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetTheme(ThemeMode.Dark))" />
+        </MudTooltip>
+        <MudTooltip Text="시스템">
+            <MudIconButton Icon="@Icons.Material.Filled.SettingsBrightness"
+                           Color="@(ThemeService.Mode == ThemeMode.System ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetTheme(ThemeMode.System))" />
+        </MudTooltip>
+
+        <AuthorizeView>
+            <Authorized>
+                <MudText Class="mx-2" Typo="Typo.body2">@context.User.Identity?.Name</MudText>
+                <form method="post" action="Account/Logout" style="display: inline;">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="Account/Login" />
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Default">
+                        로그아웃
+                    </MudButton>
+                </form>
+            </Authorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
             @Body
-        </main>
-    </div>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@code {
+    private MudThemeProvider _themeProvider = default!;
+    private bool _isDarkMode = true;
+
+    protected override void OnInitialized()
+    {
+        ThemeService.OnChange += OnThemeChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var saved = await JS.InvokeAsync<string?>("localStorage.getItem", "themeMode");
+            if (Enum.TryParse<ThemeMode>(saved, out var mode))
+            {
+                ThemeService.Set(mode);
+            }
+            await ApplyTheme();
+            StateHasChanged();
+        }
+    }
+
+    private async Task ApplyTheme()
+    {
+        _isDarkMode = ThemeService.Mode switch
+        {
+            ThemeMode.Light => false,
+            ThemeMode.Dark => true,
+            _ => await _themeProvider.GetSystemPreference()
+        };
+    }
+
+    private async Task SetTheme(ThemeMode mode)
+    {
+        ThemeService.Set(mode);
+        await JS.InvokeVoidAsync("localStorage.setItem", "themeMode", mode.ToString());
+        await ApplyTheme();
+        StateHasChanged();
+    }
+
+    private void OnThemeChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ThemeService.OnChange -= OnThemeChanged;
+    }
+}

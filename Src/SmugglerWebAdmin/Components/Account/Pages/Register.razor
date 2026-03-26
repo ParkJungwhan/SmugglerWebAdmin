@@ -1,4 +1,4 @@
-﻿@page "/Account/Register"
+@page "/Account/Register"
 @layout LoginLayout
 
 @using System.ComponentModel.DataAnnotations
@@ -19,62 +19,55 @@
 
 <PageTitle>회원가입</PageTitle>
 
-<StatusMessage Message="@Message" />
+@if (!string.IsNullOrEmpty(Message))
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">@Message</MudAlert>
+}
 
 <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
     <DataAnnotationsValidator />
-    <ValidationSummary class="text-danger small mb-3" role="alert" />
 
     <div class="mb-3">
-        <label for="Input.Email" class="form-label text-light small">이메일</label>
-        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control bg-dark text-light border-secondary"
-                   autocomplete="username" placeholder="name@example.com" />
-        <ValidationMessage For="() => Input.Email" class="text-danger small" />
+        <InputText @bind-Value="Input.Email" id="Input.Email"
+                   class="mud-like-input" autocomplete="username" placeholder="이메일" />
+        <ValidationMessage For="() => Input.Email" class="mud-error-text" />
     </div>
 
     <div class="mb-3">
-        <label for="Input.Password" class="form-label text-light small">비밀번호</label>
         <InputText type="password" @bind-Value="Input.Password" id="Input.Password"
-                   class="form-control bg-dark text-light border-secondary"
-                   autocomplete="new-password" placeholder="••••••••" />
-        <ValidationMessage For="() => Input.Password" class="text-danger small" />
+                   class="mud-like-input" autocomplete="new-password" placeholder="비밀번호" />
+        <ValidationMessage For="() => Input.Password" class="mud-error-text" />
     </div>
 
     <div class="mb-4">
-        <label for="Input.ConfirmPassword" class="form-label text-light small">비밀번호 확인</label>
         <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword"
-                   class="form-control bg-dark text-light border-secondary"
-                   autocomplete="new-password" placeholder="••••••••" />
-        <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger small" />
+                   class="mud-like-input" autocomplete="new-password" placeholder="비밀번호 확인" />
+        <ValidationMessage For="() => Input.ConfirmPassword" class="mud-error-text" />
     </div>
 
-    <button type="submit" class="btn w-100 mb-3" style="background-color: #e94560; color: white; font-weight: 600;">
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary"
+               FullWidth="true" Class="mb-3">
         회원가입
-    </button>
+    </MudButton>
 </EditForm>
 
-<hr class="border-secondary" />
+<MudDivider Class="mb-3" />
 
-<p class="text-center text-secondary small mb-0">
+<MudText Typo="Typo.body2" Align="Align.Center">
     이미 계정이 있으신가요?
-    <a href="Account/Login" class="text-decoration-none" style="color: #e94560;">로그인</a>
-</p>
+    <MudLink Href="Account/Login" Color="Color.Primary">로그인</MudLink>
+</MudText>
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = default!;
+    private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
-
-    protected override void OnInitialized()
-    {
-        Input ??= new();
-    }
 
     public async Task RegisterUser(EditContext editContext)
     {

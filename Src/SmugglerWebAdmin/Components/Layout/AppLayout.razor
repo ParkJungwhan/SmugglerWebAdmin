@@ -1,8 +1,14 @@
 @inherits LayoutComponentBase
 @implements IDisposable
 
+@using Microsoft.AspNetCore.Identity
+@using SmugglerWebAdmin.Data
+@using SmugglerWebAdmin.Services
+
 @inject ThemeService ThemeService
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
 
 <MudThemeProvider @ref="_themeProvider" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -13,10 +19,12 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                        OnClick="@(() => _drawerOpen = !_drawerOpen)" />
-        <MudText Typo="Typo.h6">
-            <strong style="color: var(--mud-palette-primary);">Smuggler</strong>
-            <span> Admin</span>
-        </MudText>
+        <MudLink Href="/select" Underline="Underline.None" Style="display: flex; align-items: center;">
+            <MudText Typo="Typo.h6">
+                <strong style="color: var(--mud-palette-primary);">Smuggler</strong>
+                <span style="color: var(--mud-palette-appbar-text);"> Admin</span>
+            </MudText>
+        </MudLink>
         <MudSpacer />
 
         <MudTooltip Text="라이트">
@@ -34,13 +42,29 @@
                            Color="@(ThemeService.Mode == ThemeMode.System ? Color.Primary : Color.Default)"
                            OnClick="@(() => SetTheme(ThemeMode.System))" />
         </MudTooltip>
+
+        <MudText Class="mx-2" Typo="Typo.body2">@_userName</MudText>
+        <form method="post" action="Account/Logout" style="display: inline;">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="Account/Login" />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined" Size="Size.Small" Color="Color.Default">
+                로그아웃
+            </MudButton>
+        </form>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="DrawerVariant.Responsive">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">메뉴</MudText>
+            <MudText Typo="Typo.subtitle1">메뉴</MudText>
         </MudDrawerHeader>
-        <NavMenu />
+        <MudNavMenu>
+            <MudNavLink Href="select" Icon="@Icons.Material.Filled.GridView">리전 선택</MudNavLink>
+            @if (_isAdmin)
+            {
+                <MudDivider Class="my-2" />
+                <MudNavLink Href="admin/users" Icon="@Icons.Material.Filled.People">멤버 권한 설정</MudNavLink>
+            }
+        </MudNavMenu>
     </MudDrawer>
 
     <MudMainContent>
@@ -53,11 +77,23 @@
 @code {
     private MudThemeProvider _themeProvider = default!;
     private bool _isDarkMode = true;
-    private bool _drawerOpen = true;
+    private bool _drawerOpen = false;
+    private bool _isAdmin;
+    private string? _userName;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ThemeService.OnChange += OnThemeChanged;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var claimsUser = authState.User;
+        _userName = claimsUser.Identity?.Name;
+
+        if (claimsUser.Identity?.IsAuthenticated == true)
+        {
+            var user = await UserManager.GetUserAsync(claimsUser);
+            _isAdmin = user?.IsAdmin == true || user?.IsSuperAdmin == true;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

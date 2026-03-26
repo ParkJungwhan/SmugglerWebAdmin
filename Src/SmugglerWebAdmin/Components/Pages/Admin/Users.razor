@@ -1,0 +1,79 @@
+@page "/admin/users"
+@attribute [Authorize]
+@layout AppLayout
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SmugglerWebAdmin.Components.Layout
+@using SmugglerWebAdmin.Data
+@using SmugglerWebAdmin.Services
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject IAdminService AdminService
+@inject NavigationManager NavigationManager
+
+<PageTitle>유저 관리</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="d-flex justify-center align-center" style="min-height: 200px;">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+    </div>
+}
+else
+{
+    <MudText Typo="Typo.h5" Class="mb-4">유저 관리</MudText>
+
+    <MudTable Items="_users" Hover="true" Striped="true" Dense="true" Elevation="2">
+        <HeaderContent>
+            <MudTh>이메일</MudTh>
+            <MudTh>가입일</MudTh>
+            <MudTh Style="text-align:center">어드민</MudTh>
+            <MudTh Style="text-align:center">슈퍼어드민</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Email</MudTd>
+            <MudTd>@context.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</MudTd>
+            <MudTd Style="text-align:center">
+                @if (context.IsAdmin || context.IsSuperAdmin)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Primary" Size="Size.Small" />
+                }
+            </MudTd>
+            <MudTd Style="text-align:center">
+                @if (context.IsSuperAdmin)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Secondary" Size="Size.Small" />
+                }
+            </MudTd>
+            <MudTd Style="text-align:right">
+                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                           OnClick="@(() => NavigationManager.NavigateTo($"/admin/users/{context.Id}"))">
+                    편집
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private bool _isLoading = true;
+    private List<ApplicationUser> _users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var currentUser = await UserManager.GetUserAsync(authState.User);
+        if (currentUser is null || (!currentUser.IsAdmin && !currentUser.IsSuperAdmin))
+        {
+            NavigationManager.NavigateTo("/select");
+            return;
+        }
+
+        _users = await AdminService.GetAllUsersAsync();
+        _isLoading = false;
+    }
+}
