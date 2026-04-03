@@ -1,0 +1,311 @@
+@page "/admin/regions"
+@attribute [Authorize]
+@layout AppLayout
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using SmugglerWebAdmin.Components.Layout
+@using SmugglerWebAdmin.Data
+@using SmugglerWebAdmin.Services
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject IRegionAdminService RegionAdminService
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+<AppShell>
+    <PageTitle>리전 설정</PageTitle>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center align-center" style="min-height: 200px;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        </div>
+    }
+    else
+    {
+        <div class="d-flex align-center justify-space-between mb-4">
+            <MudText Typo="Typo.h5">리전 설정</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenAddServiceDialogAsync">
+                서비스 추가
+            </MudButton>
+        </div>
+
+        <MudExpansionPanels MultiExpansion="true">
+            @foreach (var service in _services)
+            {
+                <MudExpansionPanel>
+                    <TitleContent>
+                        <div class="d-flex align-center gap-2">
+                            @if (service.IsActive)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" Size="Size.Small" />
+                            }
+                            <MudText Typo="Typo.subtitle1">
+                                <strong>@service.DisplayName</strong>
+                                <span class="mud-text-secondary ml-2" style="font-size:0.85em;">(@service.Name)</span>
+                            </MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">L1</MudChip>
+                            <MudSpacer />
+                            <div @onclick:stopPropagation="true">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                               OnClick="@(() => OpenEditServiceDialogAsync(service))" />
+                            </div>
+                        </div>
+                    </TitleContent>
+                    <ChildContent>
+                        <div class="pl-4 pt-2">
+                            <div class="mb-3">
+                                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           OnClick="@(() => OpenAddRegionDialogAsync(service))">
+                                    리전 추가
+                                </MudButton>
+                            </div>
+
+                            @foreach (var region in _regionsByService.GetValueOrDefault(service.Id, new()))
+                            {
+                                <MudExpansionPanels Class="mb-2">
+                                    <MudExpansionPanel>
+                                        <TitleContent>
+                                            <div class="d-flex align-center gap-2">
+                                                @if (region.IsActive)
+                                                {
+                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                                                }
+                                                else
+                                                {
+                                                    <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" Size="Size.Small" />
+                                                }
+                                                <MudText Typo="Typo.body1">
+                                                    @region.DisplayName
+                                                    <span class="mud-text-secondary ml-2" style="font-size:0.85em;">(@region.Name)</span>
+                                                </MudText>
+                                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined">L2</MudChip>
+                                                <MudSpacer />
+                                                <div @onclick:stopPropagation="true">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                                                   OnClick="@(() => OpenEditRegionDialogAsync(region))" />
+                                                </div>
+                                            </div>
+                                        </TitleContent>
+                                        <ChildContent>
+                                            <div class="pl-4 pt-2">
+                                                <div class="mb-3">
+                                                    <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                                                               StartIcon="@Icons.Material.Filled.Add"
+                                                               OnClick="@(() => OpenAddEnvironmentDialogAsync(region))">
+                                                        환경 추가
+                                                    </MudButton>
+                                                </div>
+
+                                                @foreach (var env in _envsByRegion.GetValueOrDefault(region.Id, new()))
+                                                {
+                                                    <div class="d-flex align-center gap-2 py-1">
+                                                        @if (env.IsActive)
+                                                        {
+                                                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" Size="Size.Small" />
+                                                        }
+                                                        <MudText Typo="Typo.body2">@env.DisplayName</MudText>
+                                                        <span class="mud-text-secondary" style="font-size:0.85em;">(@env.Name)</span>
+                                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">L3</MudChip>
+                                                        @if (!string.IsNullOrEmpty(env.ToolUrl))
+                                                        {
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@env.ToolUrl</MudText>
+                                                        }
+                                                        <MudSpacer />
+                                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                                                       OnClick="@(() => OpenEditEnvironmentDialogAsync(env))" />
+                                                    </div>
+                                                }
+                                            </div>
+                                        </ChildContent>
+                                    </MudExpansionPanel>
+                                </MudExpansionPanels>
+                            }
+                        </div>
+                    </ChildContent>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
+
+        @if (_services.Count == 0)
+        {
+            <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8" Color="Color.Secondary">
+                등록된 서비스가 없습니다.
+            </MudText>
+        }
+    }
+</AppShell>
+
+@code {
+    private bool _isLoading = true;
+    private List<Service> _services = new();
+    private Dictionary<int, List<ServiceRegion>> _regionsByService = new();
+    private Dictionary<int, List<RegionEnvironment>> _envsByRegion = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var currentUser = await UserManager.GetUserAsync(authState.User);
+        if (currentUser is null || (!currentUser.IsAdmin && !currentUser.IsSuperAdmin))
+        {
+            NavigationManager.NavigateTo("/select");
+            return;
+        }
+
+        await LoadAllAsync();
+        _isLoading = false;
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _services = await RegionAdminService.GetAllServicesAsync();
+        _regionsByService.Clear();
+        _envsByRegion.Clear();
+
+        foreach (var svc in _services)
+        {
+            var regions = await RegionAdminService.GetAllRegionsByServiceAsync(svc.Id);
+            _regionsByService[svc.Id] = regions;
+            foreach (var reg in regions)
+            {
+                _envsByRegion[reg.Id] = await RegionAdminService.GetAllEnvironmentsByRegionAsync(reg.Id);
+            }
+        }
+    }
+
+    // ── Service 다이얼로그 ───────────────────────────────────────────────────
+
+    private async Task OpenAddServiceDialogAsync()
+    {
+        var parameters = new DialogParameters<ServiceDialog>
+        {
+            { x => x.Name, "" },
+            { x => x.DisplayName, "" },
+            { x => x.IsActive, true },
+            { x => x.IsEdit, false },
+        };
+        var dialog = await DialogService.ShowAsync<ServiceDialog>("서비스 추가", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: ServiceDialogResult r })
+        {
+            await RegionAdminService.AddServiceAsync(r.Name, r.DisplayName);
+            await LoadAllAsync();
+        }
+    }
+
+    private async Task OpenEditServiceDialogAsync(Service service)
+    {
+        var parameters = new DialogParameters<ServiceDialog>
+        {
+            { x => x.Name, service.Name },
+            { x => x.DisplayName, service.DisplayName },
+            { x => x.IsActive, service.IsActive },
+            { x => x.IsEdit, true },
+        };
+        var dialog = await DialogService.ShowAsync<ServiceDialog>("서비스 편집", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: ServiceDialogResult r })
+        {
+            await RegionAdminService.UpdateServiceAsync(service.Id, r.Name, r.DisplayName, r.IsActive);
+            await LoadAllAsync();
+        }
+    }
+
+    // ── Region 다이얼로그 ────────────────────────────────────────────────────
+
+    private async Task OpenAddRegionDialogAsync(Service service)
+    {
+        var parameters = new DialogParameters<RegionDialog>
+        {
+            { x => x.Name, "" },
+            { x => x.DisplayName, "" },
+            { x => x.IsActive, true },
+            { x => x.IsEdit, false },
+        };
+        var dialog = await DialogService.ShowAsync<RegionDialog>($"리전 추가 — {service.DisplayName}", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: RegionDialogResult r })
+        {
+            await RegionAdminService.AddRegionAsync(service.Id, r.Name, r.DisplayName);
+            await LoadAllAsync();
+        }
+    }
+
+    private async Task OpenEditRegionDialogAsync(ServiceRegion region)
+    {
+        var parameters = new DialogParameters<RegionDialog>
+        {
+            { x => x.Name, region.Name },
+            { x => x.DisplayName, region.DisplayName },
+            { x => x.IsActive, region.IsActive },
+            { x => x.IsEdit, true },
+        };
+        var dialog = await DialogService.ShowAsync<RegionDialog>("리전 편집", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: RegionDialogResult r })
+        {
+            await RegionAdminService.UpdateRegionAsync(region.Id, r.Name, r.DisplayName, r.IsActive);
+            await LoadAllAsync();
+        }
+    }
+
+    // ── Environment 다이얼로그 ───────────────────────────────────────────────
+
+    private async Task OpenAddEnvironmentDialogAsync(ServiceRegion region)
+    {
+        var parameters = new DialogParameters<EnvironmentDialog>
+        {
+            { x => x.Name, "" },
+            { x => x.DisplayName, "" },
+            { x => x.ToolUrl, "" },
+            { x => x.IsActive, true },
+            { x => x.IsEdit, false },
+        };
+        var dialog = await DialogService.ShowAsync<EnvironmentDialog>($"환경 추가 — {region.DisplayName}", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: EnvironmentDialogResult r })
+        {
+            await RegionAdminService.AddEnvironmentAsync(region.Id, r.Name, r.DisplayName, r.ToolUrl);
+            await LoadAllAsync();
+        }
+    }
+
+    private async Task OpenEditEnvironmentDialogAsync(RegionEnvironment env)
+    {
+        var parameters = new DialogParameters<EnvironmentDialog>
+        {
+            { x => x.Name, env.Name },
+            { x => x.DisplayName, env.DisplayName },
+            { x => x.ToolUrl, env.ToolUrl },
+            { x => x.IsActive, env.IsActive },
+            { x => x.IsEdit, true },
+        };
+        var dialog = await DialogService.ShowAsync<EnvironmentDialog>("환경 편집", parameters);
+        var result = await dialog.Result;
+        if (result is { Canceled: false, Data: EnvironmentDialogResult r })
+        {
+            await RegionAdminService.UpdateEnvironmentAsync(env.Id, r.Name, r.DisplayName, r.ToolUrl, r.IsActive);
+            await LoadAllAsync();
+        }
+    }
+
+    // ── Dialog Result 레코드 ─────────────────────────────────────────────────
+
+    public sealed record ServiceDialogResult(string Name, string DisplayName, bool IsActive);
+    public sealed record RegionDialogResult(string Name, string DisplayName, bool IsActive);
+    public sealed record EnvironmentDialogResult(string Name, string DisplayName, string ToolUrl, bool IsActive);
+}

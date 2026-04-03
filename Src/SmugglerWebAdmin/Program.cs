@@ -44,6 +44,7 @@ builder.Services.AddSingleton<SchemaInitializer>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IRegionAdminService, RegionAdminService>();
 builder.Services.AddScoped<AdminInitializer>();
 builder.Services.AddScoped<TestDataSeeder>();
 

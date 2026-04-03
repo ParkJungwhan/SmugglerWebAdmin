@@ -15,7 +15,11 @@
       "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -t:Restore -p:Configuration=Debug)",
       "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -p:Configuration=Debug)",
       "Bash(\"C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" \"E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\SmugglerWebAdmin.slnx\" -t:Build -p:Configuration=Debug -v:minimal)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(powershell -command \"[Reflection.Assembly]::LoadFrom\\(''E:\\\\100.Projects\\\\SmugglerWebAdmin\\\\Src\\\\SmugglerWebAdmin\\\\bin\\\\Debug\\\\net10.0\\\\MudBlazor.dll''\\).GetTypes\\(\\) | Where-Object { $_.Name -like ''*DialogInstance*'' -or $_.Name -like ''*IMudDialog*'' } | Select-Object FullName\")",
+      "Bash(powershell -command \"Add-Type -Path ''C:\\\\Users\\\\parkj\\\\.nuget\\\\packages\\\\mudblazor\\\\7.16.0\\\\lib\\\\net8.0\\\\MudBlazor.dll''; [AppDomain]::CurrentDomain.GetAssemblies\\(\\) | Where-Object { $_.GetName\\(\\).Name -eq ''MudBlazor'' } | ForEach-Object { $_.GetTypes\\(\\) | Where-Object { $_.Name -like ''*DialogInstance*'' } | Select-Object FullName }\")",
+      "Read(//c/Users/parkj/.nuget/packages/mudblazor/7.16.0//**)",
+      "Bash(powershell -command \"$b=[System.IO.File]::ReadAllBytes\\(''C:\\\\Users\\\\parkj\\\\.nuget\\\\packages\\\\mudblazor\\\\7.16.0\\\\lib\\\\net8.0\\\\MudBlazor.dll''\\); [System.Text.Encoding]::ASCII.GetString\\($b\\) -replace ''[^\\\\x20-\\\\x7e]'','' '' | Select-String -Pattern ''MudDialog\\\\S+'' -AllMatches | ForEach-Object { $_.Matches.Value } | Sort-Object -Unique\")"
     ]
   }
 }
