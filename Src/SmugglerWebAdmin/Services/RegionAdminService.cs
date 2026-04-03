@@ -28,7 +28,7 @@ namespace SmugglerWebAdmin.Services
         {
             await using var conn = _connectionFactory.CreateConnection();
             await conn.ExecuteAsync(
-                """INSERT INTO "Services" ("Name","DisplayName") VALUES (@Name,@DisplayName)""",
+                """INSERT INTO "Services" ("Name","DisplayName","IsActive") VALUES (@Name,@DisplayName,true)""",
                 new { Name = name, DisplayName = displayName });
         }
 
@@ -55,7 +55,7 @@ namespace SmugglerWebAdmin.Services
         {
             await using var conn = _connectionFactory.CreateConnection();
             await conn.ExecuteAsync(
-                """INSERT INTO "ServiceRegions" ("ServiceId","Name","DisplayName") VALUES (@ServiceId,@Name,@DisplayName)""",
+                """INSERT INTO "ServiceRegions" ("ServiceId","Name","DisplayName","IsActive") VALUES (@ServiceId,@Name,@DisplayName,true)""",
                 new { ServiceId = serviceId, Name = name, DisplayName = displayName });
         }
 
@@ -82,7 +82,7 @@ namespace SmugglerWebAdmin.Services
         {
             await using var conn = _connectionFactory.CreateConnection();
             await conn.ExecuteAsync(
-                """INSERT INTO "RegionEnvironments" ("ServiceRegionId","Name","DisplayName","ToolUrl") VALUES (@ServiceRegionId,@Name,@DisplayName,@ToolUrl)""",
+                """INSERT INTO "RegionEnvironments" ("ServiceRegionId","Name","DisplayName","ToolUrl","IsActive") VALUES (@ServiceRegionId,@Name,@DisplayName,@ToolUrl,true)""",
                 new { ServiceRegionId = serviceRegionId, Name = name, DisplayName = displayName, ToolUrl = toolUrl });
         }
 
